@@ -1,132 +1,99 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, User, Bot } from "lucide-react";
+import { Send, Terminal } from "lucide-react";
 
 export default function Chat() {
-  // 1. Local state for mock functionality
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
-    {
-      id: "1",
-      role: "assistant",
-      content:
-        "Hello! I'm your AI guide. How can I help you explore this portfolio?",
-    },
-    { id: "2", role: "user", content: "What technologies were used here?" },
-    {
-      id: "3",
-      role: "assistant",
-      content:
-        "This project uses Next.js, Three.js (React Three Fiber), Tailwind CSS, and Framer Motion for animations!",
-    },
+    { id: "1", role: "assistant", content: "SYSTEM READY. Awaiting query..." },
   ]);
 
-  // 2. Simple mock handler
   const handleMockSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-
     const userMsg = { id: Date.now().toString(), role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
-    // Simulate AI thinking
-    setIsLoading(true);
+    // Technical Response Mock
     setTimeout(() => {
       const botMsg = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content:
-          "That's a great question! Since this is a UI mock, I'm just a hardcoded response for now.",
+        content: `[LOG]: Processing intent "${input}". Accessing Noa's skill-vault... Result: Data matches high-proficiency in AI automation.`,
       };
       setMessages((prev) => [...prev, botMsg]);
-      setIsLoading(false);
-    }, 1500);
+    }, 1000);
   };
 
   return (
-    <div className="flex flex-col w-full max-w-lg mx-auto h-[500px] bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/5">
-      {/* Chat Header */}
-      <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs font-mono tracking-widest uppercase text-slate-300">
-            AI that tells about me
+    <div className="flex flex-col w-full h-150 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-sm overflow-hidden relative shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)]">
+      {/* SCANLINE EFFECT */}
+      <div className="pointer-events-none absolute inset-0 z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-size-[100%_2px,3px_100%]" />
+
+      {/* Header */}
+      <div className="px-6 py-3 border-b border-white/10 bg-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Terminal size={14} className="text-blue-500" />
+          <span className="text-[10px] font-mono tracking-widest uppercase text-slate-400">
+            AI_INTERFACE_V4.0
           </span>
+        </div>
+        <div className="flex gap-1">
+          <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+          <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
         </div>
       </div>
 
-      {/* Message Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
-        <AnimatePresence initial={false}>
-          {messages.map((m) => (
-            <motion.div
-              key={m.id}
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              className={`flex items-start gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}
-            >
-              <div
-                className={`p-2 rounded-full ${
-                  m.role === "user"
-                    ? "bg-blue-600 shadow-lg shadow-blue-500/20"
-                    : "bg-slate-800 border border-white/10"
-                }`}
-              >
-                {m.role === "user" ? (
-                  <User size={14} className="text-white" />
-                ) : (
-                  <Bot size={14} className="text-white" />
-                )}
-              </div>
-              <div
-                className={`max-w-[85%] p-3 px-4 rounded-2xl text-sm leading-relaxed ${
-                  m.role === "user"
-                    ? "bg-linear-to-br from-blue-500 to-indigo-600 text-white rounded-tr-none shadow-md"
-                    : "bg-white/5 text-slate-200 rounded-tl-none border border-white/10 backdrop-blur-sm"
-                }`}
-              >
-                {m.content}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {isLoading && (
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
+        {messages.map((m) => (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex justify-start items-center gap-2"
+            key={m.id}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex flex-col gap-2"
           >
-            <div className="bg-white/5 border border-white/10 p-3 rounded-2xl rounded-tl-none flex gap-1">
-              <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-              <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-              <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" />
+            <div
+              className={`text-[9px] font-mono uppercase tracking-tighter ${m.role === "user" ? "text-blue-400 text-right" : "text-slate-500"}`}
+            >
+              {m.role === "user" ? "AUTHORIZED_USER" : "SYSTEM_REPLY"}
+            </div>
+            <div
+              className={`p-4 text-xs font-mono leading-relaxed ${
+                m.role === "user"
+                  ? "bg-blue-500/10 border-r-2 border-blue-500 text-blue-100 self-end ml-12"
+                  : "bg-white/5 border-l-2 border-white/20 text-slate-300 mr-12"
+              }`}
+            >
+              {m.content}
             </div>
           </motion.div>
-        )}
+        ))}
       </div>
 
-      {/* Input Area */}
+      {/* Input */}
       <form
         onSubmit={handleMockSubmit}
-        className="p-4 bg-black/40 border-t border-white/10 backdrop-blur-md"
+        className="p-6 bg-black/20 border-t border-white/10"
       >
-        <div className="relative flex items-center gap-2">
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-blue-500 font-mono text-xs">
+            {">"}
+          </span>
           <input
-            className="flex-1 bg-slate-900/50 border border-white/10 rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white placeholder:text-slate-500"
+            className="w-full bg-white/5 border border-white/10 rounded-sm pl-8 pr-12 py-3 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-white placeholder:text-slate-700"
             value={input}
-            placeholder="Type a message..."
+            placeholder="INPUT COMMAND..."
             onChange={(e) => setInput(e.target.value)}
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
-            className="p-3 bg-white text-black rounded-full hover:bg-slate-200 disabled:opacity-20 disabled:grayscale transition-all cursor-pointer"
+            className="absolute right-3 p-1 hover:text-blue-400 transition-colors"
           >
-            <Send size={18} />
+            <Send size={16} />
           </button>
         </div>
       </form>
