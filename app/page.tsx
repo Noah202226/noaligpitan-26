@@ -1,65 +1,78 @@
-import Image from "next/image";
+"use client";
+import React from "react";
+import { motion } from "framer-motion";
+import Scene from "@/app/components/Scene";
+import Chat from "./components/Chat"; // Your Mock Chat component
+import Navbar from "./components/sections/Navbar";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="relative min-h-screen w-full overflow-hidden text-white">
+      {/* Background Layer */}
+      <Scene />
+      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0)_0%,rgba(2,6,23,0.8)_100%)]" />
+
+      {/* Navigation */}
+      <Navbar />
+
+      {/* Main Content Grid */}
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pt-32 pb-20 min-h-screen flex items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
+          {/* LEFT COLUMN: Hero Text */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-left"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <span className="inline-block px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase border rounded-full border-white/10 bg-white/5 mb-6">
+              Available for Freelance
+            </span>
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none">
+              DESIGN <br />
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400">
+                BEYOND
+              </span>{" "}
+              <br />
+              STATIC
+            </h1>
+            <p className="max-w-md mt-8 text-lg text-slate-400 leading-relaxed">
+              A developer portfolio exploring the intersection of AI-driven
+              interfaces and immersive 3D experiences.
+            </p>
+
+            <div className="flex gap-4 mt-10">
+              <button className="px-8 py-4 font-bold bg-white text-black rounded-xl hover:bg-slate-200 transition-all cursor-pointer shadow-lg shadow-white/5">
+                View Work
+              </button>
+            </div>
+          </motion.div>
+
+          {/* RIGHT COLUMN: Chat Component */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="w-full flex justify-center lg:justify-end"
           >
-            Documentation
-          </a>
+            <div className="w-full max-w-md">
+              {/* Mock Profile Image for Mobile View context */}
+              <div className="lg:hidden mb-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-linear-to-tr from-blue-500 to-emerald-500 border border-white/20" />
+                <div>
+                  <h4 className="font-bold text-sm">About Me</h4>
+                  <p className="text-xs text-slate-500">AI Assistant Online</p>
+                </div>
+              </div>
+
+              <Chat />
+            </div>
+          </motion.div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Grid Pattern Overlay */}
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-10 [background-image:linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] [background-size:60px_60px]" />
+    </main>
   );
 }
