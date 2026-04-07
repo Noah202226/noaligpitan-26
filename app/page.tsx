@@ -103,7 +103,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="relative h-screen w-full overflow-hidden">
+    <main className="relative min-h-screen w-full overflow-x-hidden lg:h-screen lg:overflow-hidden">
       <Scene />
 
       {/* TECHNICAL OVERLAYS */}
@@ -116,8 +116,8 @@ export default function Home() {
       <div className="pointer-events-none fixed bottom-10 left-10 z-50 border-b border-l border-white/20 w-20 h-20" />
       <div className="pointer-events-none fixed bottom-10 right-10 z-50 border-b border-r border-white/20 w-20 h-20" />
 
-      <section className="relative z-10 mx-auto max-w-400 px-8 min-h-screen flex items-center justify-center py-20 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch w-full">
+      <section className="relative z-10 mx-auto max-w-400 px-8 min-h-screen flex items-start lg:items-center justify-center py-20 lg:py-10 lg:overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch w-full pt-10 lg:pt-0">
           {/* LEFT: IDENTITY & CORE INFO */}
           <div className="lg:col-span-4 flex flex-col justify-between space-y-8">
             <motion.div
@@ -212,7 +212,7 @@ export default function Home() {
           </div>
 
           {/* CENTER: DYNAMIC CONTENT AREA */}
-          <div className="lg:col-span-4 flex flex-col justify-center border-x border-white/10 px-10">
+          <div className="lg:col-span-4 flex flex-col justify-center border-x border-white/10 px-0 lg:px-10 py-10 lg:py-0">
             <div className="min-h-112.5 flex flex-col justify-center">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -228,7 +228,7 @@ export default function Home() {
 
                   {activeSection === "mission" && (
                     <>
-                      <h1 className="text-7xl font-black uppercase tracking-tighter leading-[0.85] text-white">
+                      <h1 className="text-6xl lg:text-7xl font-black uppercase tracking-tighter leading-[0.85] text-white">
                         Solving <br />{" "}
                         <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 drop-shadow-sm">
                           Complex
@@ -259,7 +259,7 @@ export default function Home() {
                             className="p-4 border border-white/10 bg-white/5 hover:bg-blue-500/20 hover:border-blue-500/50 cursor-pointer transition-all flex justify-between items-center group"
                           >
                             <div className="space-y-1">
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <span className="font-mono text-[10px] text-blue-400 font-bold uppercase tracking-tight">
                                   [RUN] {p.name}
                                 </span>
@@ -271,7 +271,7 @@ export default function Home() {
                                 {p.impact}
                               </p>
                             </div>
-                            <span className="text-blue-500 group-hover:translate-x-1 transition-transform">
+                            <span className="text-blue-500 group-hover:translate-x-1 transition-transform pl-2">
                               →
                             </span>
                           </motion.a>
@@ -291,7 +291,7 @@ export default function Home() {
                             key={i}
                             className="border-l border-blue-500/30 pl-4 space-y-1"
                           >
-                            <div className="flex justify-between items-start">
+                            <div className="flex flex-col lg:flex-row justify-between lg:items-start gap-1 lg:gap-0">
                               <h4 className="text-white font-black text-sm uppercase tracking-wider">
                                 {exp.company}
                               </h4>
@@ -302,7 +302,7 @@ export default function Home() {
                             <p className="text-xs text-yellow-400 font-bold uppercase tracking-widest">
                               {exp.role}
                             </p>
-                            <p className="text-slate-400 text-xs leading-relaxed">
+                            <p className="text-slate-400 text-xs leading-relaxed mt-1">
                               {exp.details}
                             </p>
                           </div>
@@ -339,7 +339,7 @@ export default function Home() {
                                 </span>
                               </div>
                             </div>
-                            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 uppercase tracking-tighter">
+                            <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-1 lg:gap-0 text-[10px] font-mono text-slate-500 uppercase tracking-tighter">
                               <span className="truncate max-w-37.5">
                                 {cred.issuer}
                               </span>
@@ -382,7 +382,7 @@ export default function Home() {
           </div>
 
           {/* RIGHT: CHAT INTERFACE */}
-          <div className="lg:col-span-4 h-full flex items-center">
+          <div className="lg:col-span-4 h-full min-h-[500px] lg:min-h-0 flex items-center pb-20 lg:pb-0">
             <Chat />
           </div>
         </div>
