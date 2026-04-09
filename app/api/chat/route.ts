@@ -1,25 +1,26 @@
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
 
-const model = google("gemini-1.5-pro");
-
+const model = google("gemini-2.5-flash");
+const openaiModel = openai("gpt-4.1-nano");
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  // Use 'any' here to bypass the strict ModelMessage compatibility check.
-  // The streamText function will validate the data structure at runtime.
-  const { messages }: { messages: any[] } = await req.json();
+  try {
+    // 1. Extract the prompt/messages from the request body
+    const { prompt } = await req.json();
 
-  const result = await streamText({
-    model,
-    messages,
-    system: `
-      You are a high-end portfolio assistant. 
-      Keep responses concise, professional, and slightly witty.
-      You know about Three.js, React, and modern web design.
-    `,
-  });
+    // 2. Generate text using the model
+    const { text } = await generateText({
+      model: model,
+      prompt: prompt || "Hello!",
+    });
 
-  // Based on your previous error, your version likely uses this:
-  return result.toTextStreamResponse();
+    // 3. Return the JSON response
+    return Response.json({ text });
+  } catch (error) {
+    console.error("API Error:", error);
+    return Response.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
