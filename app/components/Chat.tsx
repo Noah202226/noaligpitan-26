@@ -2,30 +2,32 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Terminal } from "lucide-react";
+import { useChat } from "@ai-sdk/react";
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([
-    { id: "1", role: "assistant", content: "SYSTEM READY. Awaiting query..." },
-  ]);
+  // const [messages, setMessages] = useState([
+  //   { id: "1", role: "assistant", content: "SYSTEM READY. Awaiting query..." },
+  // ]);
+
+  const { messages, sendMessage, status, error, stop } = useChat();
 
   const handleMockSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    const userMsg = { id: Date.now().toString(), role: "user", content: input };
-    setMessages((prev) => [...prev, userMsg]);
+    sendMessage({ text: input });
     setInput("");
-
-    // Technical Response Mock
-    setTimeout(() => {
-      const botMsg = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: `[LOG]: Processing intent "${input}". Accessing Noa's skill-vault... Result: Data matches high-proficiency in AI automation.`,
-      };
-      setMessages((prev) => [...prev, botMsg]);
-    }, 1000);
   };
+
+  {
+    (status === "submitted" || status === "streaming") && (
+      <div className="mb-4">
+        <div className="flex items-center gap-2">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-150 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-sm overflow-hidden relative shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)]">
@@ -47,6 +49,8 @@ export default function Chat() {
         </div>
       </div>
 
+      {error && <div className="text-red-500 mb-4">{error.message}</div>}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
         {messages.map((m) => (
@@ -57,9 +61,9 @@ export default function Chat() {
             className="flex flex-col gap-2"
           >
             <div
-              className={`text-[9px] font-mono uppercase tracking-tighter ${m.role === "user" ? "text-blue-400 text-right" : "text-slate-500"}`}
+              className={`text-[9px] font-semibold font-mono uppercase tracking-tighter ${m.role === "user" ? "text-blue-400 text-right" : "text-slate-500"}`}
             >
-              {m.role === "user" ? "AUTHORIZED_USER" : "SYSTEM_REPLY"}
+              {m.role === "user" ? "YOU:" : "ME:"}
             </div>
             <div
               className={`p-4 text-xs font-mono leading-relaxed ${
@@ -68,7 +72,21 @@ export default function Chat() {
                   : "bg-white/5 border-l-2 border-white/20 text-slate-300 mr-12"
               }`}
             >
-              {m.content}
+              {m.parts.map((part, index) => {
+                switch (part.type) {
+                  case "text":
+                    return (
+                      <div
+                        key={`${m.id}-${index}`}
+                        className="whitespace-pre-wrap"
+                      >
+                        {part.text}
+                      </div>
+                    );
+                  default:
+                    return null;
+                }
+              })}
             </div>
           </motion.div>
         ))}
@@ -86,15 +104,26 @@ export default function Chat() {
           <input
             className="w-full bg-white/5 border border-white/10 rounded-sm pl-8 pr-12 py-3 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-white placeholder:text-slate-700"
             value={input}
-            placeholder="INPUT COMMAND..."
+            placeholder="What you want to know more about me?"
             onChange={(e) => setInput(e.target.value)}
           />
-          <button
-            type="submit"
-            className="absolute right-3 p-1 hover:text-blue-400 transition-colors"
-          >
-            <Send size={16} />
-          </button>
+
+          {status === "submitted" || status === "streaming" ? (
+            <button
+              onClick={stop}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-blue-500"
+            >
+              Stop
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="absolute right-3 p-1 hover:text-blue-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={status !== "ready"}
+            >
+              <Send size={16} />
+            </button>
+          )}
         </div>
       </form>
     </div>
