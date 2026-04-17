@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Scene from "@/app/components/Scene";
 import Chat from "./components/Chat";
 
+import { UNIFIED_DATA } from "@/app/lib/data";
+
 type Section = "mission" | "projects" | "experience" | "credentials";
 
 const STATUSES = [
@@ -249,7 +251,7 @@ export default function Home() {
                         Active Deployments
                       </h2>
                       <div className="space-y-3 pt-4">
-                        {PROJECTS_DATA.map((p) => (
+                        {UNIFIED_DATA.projects.map((p) => (
                           <motion.a
                             key={p.name}
                             href={p.link}
@@ -286,7 +288,7 @@ export default function Home() {
                         Experience Ledger
                       </h2>
                       <div className="space-y-6 pt-4 max-h-100 overflow-y-auto custom-scrollbar">
-                        {EXPERIENCE_DATA.map((exp, i) => (
+                        {UNIFIED_DATA.experience.map((exp, i) => (
                           <div
                             key={i}
                             className="border-l border-blue-500/30 pl-4 space-y-1"
@@ -382,7 +384,7 @@ export default function Home() {
           </div>
 
           {/* RIGHT: CHAT INTERFACE */}
-          <div className="lg:col-span-4 h-full min-h-[500px] lg:min-h-0 flex items-center pb-20 lg:pb-0">
+          <div className="lg:col-span-4 h-full min-h-125 lg:min-h-0 flex items-center pb-20 lg:pb-0">
             <Chat />
           </div>
         </div>

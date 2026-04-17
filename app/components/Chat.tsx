@@ -1,16 +1,26 @@
 "use client";
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Send, Terminal } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Send, Terminal, Zap } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
+import SkillsMatrix from "./sections/SkillsMatrix"; // Ensure the path is correct
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  // const [messages, setMessages] = useState([
-  //   { id: "1", role: "assistant", content: "SYSTEM READY. Awaiting query..." },
-  // ]);
-
   const { messages, sendMessage, status, error, stop } = useChat();
+
+  // 1. Create a reference for the bottom of the message list
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 2. Auto-scroll function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // 3. Trigger scroll whenever messages or status changes
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, status]);
 
   const handleMockSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,16 +28,6 @@ export default function Chat() {
     sendMessage({ text: input });
     setInput("");
   };
-
-  {
-    (status === "submitted" || status === "streaming") && (
-      <div className="mb-4">
-        <div className="flex items-center gap-2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col w-full h-150 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-sm overflow-hidden relative shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)]">
@@ -49,10 +49,27 @@ export default function Chat() {
         </div>
       </div>
 
-      {error && <div className="text-red-500 mb-4">{error.message}</div>}
-
-      {/* Messages */}
+      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
+        {/* SKILLS MATRIX AS SYSTEM STARTUP */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex items-center gap-2 mb-4 text-[10px] font-mono text-blue-500/60 uppercase tracking-[0.2em]">
+            <Zap size={12} />
+            <span>Initializing_Technical_Diagnostic...</span>
+          </div>
+          <SkillsMatrix />
+        </motion.div>
+
+        {error && (
+          <div className="p-3 bg-red-500/10 border border-red-500/50 text-red-500 text-[10px] font-mono">
+            ERROR: {error.message}
+          </div>
+        )}
+
         {messages.map((m) => (
           <motion.div
             key={m.id}
@@ -61,9 +78,13 @@ export default function Chat() {
             className="flex flex-col gap-2"
           >
             <div
-              className={`text-[9px] font-semibold font-mono uppercase tracking-tighter ${m.role === "user" ? "text-blue-400 text-right" : "text-slate-500"}`}
+              className={`text-[9px] font-semibold font-mono uppercase tracking-tighter ${
+                m.role === "user"
+                  ? "text-blue-400 text-right"
+                  : "text-slate-500"
+              }`}
             >
-              {m.role === "user" ? "YOU:" : "ME:"}
+              {m.role === "user" ? "USER_PROMPT:" : "SYSTEM_RESPONSE:"}
             </div>
             <div
               className={`p-4 text-xs font-mono leading-relaxed ${
@@ -90,6 +111,17 @@ export default function Chat() {
             </div>
           </motion.div>
         ))}
+
+        {/* LOADING STATE INDICATOR */}
+        {(status === "submitted" || status === "streaming") && (
+          <div className="flex items-center gap-2 text-blue-500 animate-pulse font-mono text-[10px]">
+            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></span>
+            SYSTEM_THINKING...
+          </div>
+        )}
+
+        {/* 4. Anchor element for auto-scroll */}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
@@ -104,21 +136,22 @@ export default function Chat() {
           <input
             className="w-full bg-white/5 border border-white/10 rounded-sm pl-8 pr-12 py-3 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-white placeholder:text-slate-700"
             value={input}
-            placeholder="What you want to know more about me?"
+            placeholder="Query system for personal data..."
             onChange={(e) => setInput(e.target.value)}
           />
 
           {status === "submitted" || status === "streaming" ? (
             <button
+              type="button"
               onClick={stop}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-blue-500"
+              className="absolute right-3 px-3 py-1 bg-red-500/20 border border-red-500/50 text-red-500 text-[10px] font-mono hover:bg-red-500 hover:text-white transition-all"
             >
-              Stop
+              ABORT
             </button>
           ) : (
             <button
               type="submit"
-              className="absolute right-3 p-1 hover:text-blue-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="absolute right-3 p-1 text-slate-500 hover:text-blue-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               disabled={status !== "ready"}
             >
               <Send size={16} />
