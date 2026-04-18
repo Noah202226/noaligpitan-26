@@ -82,23 +82,23 @@ export default function Home() {
 
       {/* TECHNICAL OVERLAYS */}
       <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0)_0%,rgba(2,6,23,0.9)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.05] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[length:40px_40px]" />
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.05] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-size-[40px_40px]" />
 
-      <section className="relative z-10 mx-auto max-w-[1600px] px-8 min-h-screen flex items-start lg:items-center justify-center py-20 lg:py-10 lg:overflow-hidden">
+      <section className="relative z-10 mx-auto max-w-400 px-8 min-h-screen flex items-start lg:items-center justify-center py-20 lg:py-10 lg:overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch w-full pt-10 lg:pt-0">
           {/* LEFT: IDENTITY */}
           <div className="lg:col-span-4 flex flex-col justify-between space-y-6">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white/5 backdrop-blur-2xl border border-white/20 rounded-sm relative overflow-hidden group min-h-[480px] cursor-pointer shadow-2xl shadow-blue-500/10"
+              className="bg-white/5 backdrop-blur-2xl border border-white/20 rounded-sm relative overflow-hidden group min-h-120 cursor-pointer shadow-2xl shadow-blue-500/10"
             >
               <div className="absolute inset-0 z-0 overflow-hidden ">
                 <div className="absolute -inset-12 bg-blue-600/20 rounded-full blur-3xl group-hover:bg-blue-500/40 transition-all duration-700 " />
                 <img
                   src="/noa-profile.png"
                   alt={UNIFIED_DATA.identity.name}
-                  className="relative w-full h-full object-cover grayscale-[50%] group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                  className="relative w-full h-full object-cover grayscale-50 group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
                 />
               </div>
 
@@ -168,9 +168,9 @@ export default function Home() {
                     className="px-6 py-4 border-l-4 border-blue-500 bg-white/5 border-y border-r border-y-white/10 border-r-white/10 flex justify-between items-center backdrop-blur-sm group"
                   >
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-mono text-blue-500/80 font-bold">
+                      {/* <span className="text-[9px] font-mono text-blue-500/80 font-bold">
                         0{i + 1}
-                      </span>
+                      </span> */}
                       <span className="text-sm font-black italic uppercase tracking-[0.2em] text-white group-hover:text-blue-400 transition-colors">
                         {stat}
                       </span>
@@ -198,9 +198,9 @@ export default function Home() {
                       {social.icon}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[8px] font-mono text-slate-500 uppercase leading-none mb-1">
+                      {/* <span className="text-[8px] font-mono text-slate-500 uppercase leading-none mb-1">
                         Link_{i + 1}
-                      </span>
+                      </span> */}
                       <span className="text-[9px] font-black text-white uppercase tracking-tighter group-hover:text-blue-400 transition-colors">
                         {social.label}
                       </span>
@@ -213,7 +213,7 @@ export default function Home() {
 
           {/* CENTER: DYNAMIC CONTENT AREA */}
           <div className="lg:col-span-4 flex flex-col justify-center border-x border-white/10 px-0 lg:px-10 py-10 lg:py-0">
-            <div className="min-h-[500px] flex flex-col justify-center">
+            <div className="min-h-125 flex flex-col justify-center">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeSection}
@@ -247,7 +247,7 @@ export default function Home() {
                       <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter">
                         Active Deployments
                       </h2>
-                      <div className="space-y-3 pt-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                      <div className="space-y-3 pt-4 max-h-100 overflow-y-auto custom-scrollbar pr-2">
                         {UNIFIED_DATA.projects.map((p) => (
                           <motion.a
                             key={p.name}
@@ -284,13 +284,13 @@ export default function Home() {
                       <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter">
                         Experience Ledger
                       </h2>
-                      <div className="space-y-6 pt-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-4">
+                      <div className="space-y-6 pt-4 max-h-100 overflow-y-auto custom-scrollbar pr-4">
                         {UNIFIED_DATA.experience.map((exp, i) => (
                           <div
                             key={i}
                             className="border-l border-blue-500/30 pl-4 space-y-1 relative group"
                           >
-                            <div className="absolute -left-[1.5px] top-0 h-4 w-[3px] bg-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute -left-[1.5px] top-0 h-4 w-0.75 bg-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                             <div className="flex flex-col lg:flex-row justify-between lg:items-start gap-1 lg:gap-0">
                               <h4 className="text-white font-black text-sm uppercase tracking-wider group-hover:text-blue-400 transition-colors">
                                 {exp.company}
@@ -316,7 +316,7 @@ export default function Home() {
                       <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter">
                         Authentication Keys
                       </h2>
-                      <div className="grid gap-3 pt-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                      <div className="grid gap-3 pt-4 max-h-100 overflow-y-auto custom-scrollbar pr-2">
                         {UNIFIED_DATA.credentials.map((cred, i) => (
                           <motion.a
                             key={i}
@@ -337,7 +337,7 @@ export default function Home() {
                               </div>
                             </div>
                             <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-1 lg:gap-0 text-[10px] font-mono text-slate-500 uppercase tracking-tighter">
-                              <span className="truncate max-w-[150px]">
+                              <span className="truncate max-w-37.5">
                                 {cred.issuer}
                               </span>
                               <span className="group-hover:text-white transition-colors">
@@ -381,7 +381,7 @@ export default function Home() {
           </div>
 
           {/* RIGHT: CHAT */}
-          <div className="lg:col-span-4 h-full min-h-[500px] lg:min-h-0 flex items-center pb-20 lg:pb-0">
+          <div className="lg:col-span-4 h-full min-h-125 lg:min-h-0 flex items-center pb-20 lg:pb-0">
             <Chat />
           </div>
         </div>

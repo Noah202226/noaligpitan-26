@@ -93,12 +93,12 @@ export default function Chat() {
   const isBusy = status === "submitted" || status === "streaming";
 
   return (
-    <div className="flex flex-col w-full max-w-5xl mx-auto h-[750px] bg-[#050505] border border-white/10 rounded-xl overflow-hidden relative shadow-[0_0_50px_-12px_rgba(234,179,8,0.15)] transition-all duration-500">
+    <div className="flex flex-col w-full max-w-5xl mx-auto h-187.5 bg-[#050505] border border-white/10 rounded-xl overflow-hidden relative shadow-[0_0_50px_-12px_rgba(234,179,8,0.15)] transition-all duration-500">
       {/* SCANLINE EFFECT */}
-      <div className="pointer-events-none absolute inset-0 z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(234,179,8,0.06),rgba(0,255,0,0.02),rgba(59,130,246,0.06))] bg-[length:100%_2px,3px_100%]" />
+      <div className="pointer-events-none absolute inset-0 z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(234,179,8,0.06),rgba(0,255,0,0.02),rgba(59,130,246,0.06))] bg-size-[100%_2px,3px_100%]" />
 
       {/* HEADER */}
-      <div className="px-6 py-4 border-b border-white/5 bg-white/[0.01] flex items-center justify-between backdrop-blur-xl">
+      <div className="px-6 py-4 border-b border-white/5 bg-white/1 flex items-center justify-between backdrop-blur-xl">
         <div className="flex items-center gap-4">
           <div className="p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
             <Terminal size={16} className="text-yellow-400" />
@@ -119,7 +119,7 @@ export default function Chat() {
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-md"
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/3 border border-white/10 rounded-md"
               >
                 <Cpu size={12} className="text-yellow-400/70" />
                 <span className="text-[9px] font-mono text-slate-300 uppercase tracking-widest">
@@ -163,7 +163,7 @@ export default function Chat() {
               className={`p-5 rounded-xl font-mono text-[14px] leading-[1.6] shadow-sm transition-all ${
                 m.role === "user"
                   ? "bg-yellow-500/5 border border-yellow-500/20 text-yellow-50 text-right rounded-tr-none"
-                  : "bg-white/[0.03] border border-white/10 text-slate-300 rounded-tl-none backdrop-blur-sm"
+                  : "bg-white/3 border border-white/10 text-slate-300 rounded-tl-none backdrop-blur-sm"
               }`}
             >
               {m.parts.map(
@@ -192,7 +192,7 @@ export default function Chat() {
       </div>
 
       {/* INPUT AREA */}
-      <div className="p-8 bg-white/[0.01] border-t border-white/5">
+      <div className="p-8 bg-white/1 border-t border-white/5">
         {/* QUICK ACTIONS */}
         {!isBusy && messages.length < 5 && (
           <div className="flex flex-wrap gap-2 mb-6">
@@ -200,7 +200,7 @@ export default function Chat() {
               <button
                 key={i}
                 onClick={() => handleSubmit(action.text)}
-                className="flex items-center gap-2 px-3 py-2 bg-white/[0.02] border border-white/10 rounded-lg text-[10px] font-mono text-slate-500 hover:border-yellow-500/40 hover:text-yellow-400 transition-all"
+                className="flex items-center gap-2 px-3 py-2 bg-white/2 border border-white/10 rounded-lg text-[10px] font-mono text-slate-500 hover:border-yellow-500/40 hover:text-yellow-400 transition-all"
               >
                 {action.icon}
                 {action.label}
@@ -209,7 +209,7 @@ export default function Chat() {
           </div>
         )}
 
-        <div className="relative group bg-white/[0.02] border border-white/10 rounded-xl focus-within:border-yellow-500/40 focus-within:bg-yellow-500/[0.02] transition-all duration-500">
+        <div className="relative group bg-white/2 border border-white/10 rounded-xl focus-within:border-yellow-500/40 focus-within:bg-yellow-500/2 transition-all duration-500">
           <span className="absolute left-5 top-4.5 text-yellow-500/50 font-mono text-sm select-none">
             {">"}
           </span>

@@ -75,6 +75,20 @@ export const UNIFIED_DATA = {
         "Manage ordering system, and notified both clients and owner using email",
       link: "https://luckyz-delicacies.vercel.app/",
     },
+    {
+      name: "LuckyZDelicacies2",
+      tech: "NEXT.JS / APPWRITE",
+      impact:
+        "Manage ordering system, and notified both clients and owner using email",
+      link: "https://luckyz-delicacies.vercel.app/",
+    },
+    {
+      name: "LuckyZDelicacies23",
+      tech: "NEXT.JS / APPWRITE",
+      impact:
+        "Manage ordering system, and notified both clients and owner using email",
+      link: "https://luckyz-delicacies.vercel.app/",
+    },
   ],
   credentials: [
     {

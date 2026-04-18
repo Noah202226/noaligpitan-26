@@ -35,7 +35,7 @@ const SkillsMatrix = () => {
   return (
     <div className="w-full max-w-2xl mx-auto space-y-10 font-mono">
       {/* HUD HEADER - YELLOW THEME */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-4">
+      {/* <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
           <div className="h-2 w-2 bg-yellow-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
           <h2 className="text-[10px] font-bold tracking-[0.4em] text-white uppercase">
@@ -45,7 +45,7 @@ const SkillsMatrix = () => {
         <span className="text-[9px] text-slate-500 tracking-widest uppercase">
           Status: <span className="text-yellow-400">Optimized</span>
         </span>
-      </div>
+      </div> */}
 
       {/* DYNAMIC SKILLS LIST */}
       <div className="grid grid-cols-1 gap-y-12">
@@ -59,9 +59,9 @@ const SkillsMatrix = () => {
           >
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
               <div className="space-y-1">
-                <p className="text-[8px] text-yellow-500/60 font-bold tracking-tighter">
+                {/* <p className="text-[8px] text-yellow-500/60 font-bold tracking-tighter">
                   SYSTEM_ID: {group.id}
-                </p>
+                </p> */}
                 <h3 className="text-sm font-black text-white uppercase tracking-wider group-hover:text-yellow-400 transition-colors">
                   {group.category}
                 </h3>
