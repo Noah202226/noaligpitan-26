@@ -4,7 +4,7 @@ export const UNIFIED_DATA = {
   identity: {
     name: "Noa Ligpitan",
     role: "Full-Stack Developer & Business Automation Architect",
-    experience_years: "7+",
+    experience_years: "4+",
     location: "GMT+8 (PHL)",
     philosophy:
       "Solving Complex Chaos. Architecting solutions that eliminate business friction and increase revenue through smart automation.",
@@ -14,7 +14,7 @@ export const UNIFIED_DATA = {
   stack: {
     frontend: ["ReactJS", "NextJS", "DaisyUI", "Schadcn", "ElectronJS"],
     backend: ["Node.js", "Express", "FastAPI", "Flask", "Laravel"],
-    database: ["MongoDB", "Appwrite"],
+    database: ["MongoDB", "Appwrite", "Convex"],
     automation_ai: [
       "n8n (Advanced)",
       "Gemini",
@@ -55,24 +55,25 @@ export const UNIFIED_DATA = {
   ],
   projects: [
     {
-      name: "Practice Management Engine",
-      tech: "ELECTRONJS / MONGODB",
+      name: "Dental Clinic",
+      tech: "NEXT.JS / APPWRITE / ZUSTAND / PWA",
       impact:
         "Digitized dental patient histories and payment tracking, reducing manual bookkeeping hours.",
-      link: "https://github.com/Noah202226",
+      link: "https://dental-clinic-v3-arctech.vercel.app/",
     },
     {
-      name: "RAKAPE & LuckyZDelicacies",
+      name: "RAKAPE & ",
       tech: "NEXT.JS / APPWRITE",
       impact:
         "Full-stack e-commerce and CMS platforms with real-time menu management.",
-      link: "https://noaligpitan.site",
+      link: "https://ra-kape.vercel.app/",
     },
     {
-      name: "CRM Automation",
-      tech: "NEXT.JS / REDIS",
-      impact: "Reduces lead response time by 40%.",
-      link: "#",
+      name: "LuckyZDelicacies",
+      tech: "NEXT.JS / APPWRITE",
+      impact:
+        "Manage ordering system, and notified both clients and owner using email",
+      link: "https://luckyz-delicacies.vercel.app/",
     },
   ],
   credentials: [

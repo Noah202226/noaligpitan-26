@@ -1,83 +1,176 @@
-import { openai } from "@ai-sdk/openai";
-import { google } from "@ai-sdk/google";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGroq } from "@ai-sdk/groq";
 import { convertToModelMessages, streamText, UIMessage } from "ai";
 import { getAiKnowledgeBase } from "@/app/lib/data";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+type ProviderKey = "google" | "openai" | "groq";
+
+interface ModelConfig {
+  provider: ProviderKey;
+  modelId: string;
+  label: string;
+}
+
+// ─── Fallback Chain ───────────────────────────────────────────────────────────
+// Order: Free/High-Quota first.
+const MODEL_CHAIN: ModelConfig[] = [
+  { provider: "groq", modelId: "llama-3.1-8b-instant", label: "groq" },
+  {
+    provider: "google",
+    modelId: "gemini-2.5-flash-lite", // Latest high-speed free tier
+    label: "Gemini 2.5 Lite (Free)",
+  },
+  { provider: "openai", modelId: "openai/gpt-oss-120b", label: "GPT OSS 120B" },
+];
+
+// ─── In-memory rate limit tracker ────────────────────────────────────────────
+const blockedUntil: Record<string, number> = {};
+
+function isBlocked(modelId: string): boolean {
+  const until = blockedUntil[modelId] ?? 0;
+  if (Date.now() > until) {
+    delete blockedUntil[modelId]; // unblock
+    return false;
+  }
+  return true;
+}
+
+function blockModel(modelId: string, ms = 5 * 60 * 1000) {
+  blockedUntil[modelId] = Date.now() + ms;
+  console.warn(`[chat] Blocked model "${modelId}" for ${ms / 1000}s`);
+}
+
+// ─── Per-IP throttle ──────────────────────────────────────────────────────────
+const ipMap = new Map<string, { count: number; resetAt: number }>();
+const MAX_PER_IP = 25;
+const WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function checkIp(ip: string): boolean {
+  const now = Date.now();
+  const entry = ipMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    ipMap.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= MAX_PER_IP) return false;
+  entry.count++;
+  return true;
+}
+
+// ─── Build model instance ─────────────────────────────────────────────────────
+function buildModel(config: ModelConfig) {
+  const keys = {
+    google: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    openai: process.env.OPENAI_API_KEY,
+    groq: process.env.GROQ_API_KEY,
+  };
+
+  if (!keys[config.provider]) {
+    throw new Error(`MISSING_API_KEY_FOR_${config.provider.toUpperCase()}`);
+  }
+
+  switch (config.provider) {
+    case "google":
+      return createGoogleGenerativeAI({ apiKey: keys.google })(config.modelId);
+    case "openai":
+      return createOpenAI({ apiKey: keys.openai })(config.modelId);
+    case "groq":
+      return createGroq({ apiKey: keys.groq })(config.modelId);
+    default:
+      throw new Error(`Unknown provider: ${config.provider}`);
+  }
+}
+
+// ─── Main Handler ─────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
+    // IP guard
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (!checkIp(ip)) {
+      return Response.json(
+        { error: "RATE_LIMIT: Too many requests. Try again later." },
+        { status: 429 },
+      );
+    }
+
     const { messages }: { messages: UIMessage[] } = await req.json();
     const coreMessages = await convertToModelMessages(messages);
-    const systemPrompt = `You are an expert AI representative for Noa V. Ligpitan,
-               Use the following verified knowledge base to answer queries:
-               ${getAiKnowledgeBase()}.
-                answer all prompt/message/inquiry using my data, not as an AI LLM, Dont answer like this: 'As an AI, I don't have personal certificates. `;
 
-    // Define your model priority list
-    const models = [
-      google("gemini-2.5-flash"), // Fallback 2
-      openai("gpt-5-chat-latest"), // Fallback 1
-    ];
+    // Using verified data from resume
+    const systemPrompt = `You are an expert AI representative for Noa V. Ligpitan. 
+Role: Full-Stack Developer with 4 years of experience.
+Knowledge Base: ${getAiKnowledgeBase()}
+Keep responses concise and scannable.`;
 
-    let lastError;
+    let lastError: any;
 
-    // const MY_DATA = `
-    //               # IDENTITY & VALUE PROPOSITION
-    //               - Name: Noa Ligpitan
-    //               - Role: Full-Stack Developer & Business Automation Architect
-    //               - Experience: 7+ years of professional technical experience
-    //               - Summary: Expert in transforming manual, friction-heavy business workflows into scalable, automated digital systems. Specialized in custom CMS development and AI-driven efficiency.
+    // ── Try each model in the chain ──────────────────────────────────────────
+    for (const config of MODEL_CHAIN) {
+      if (isBlocked(config.modelId)) {
+        console.log(`[chat] Skipping blocked model: ${config.label}`);
+        continue;
+      }
 
-    //               # CORE TECHNICAL STACK
-    //               - Frontend: ReactJS, NextJS (Intermediate), DaisyUI, Schadcn, ElectronJS
-    //               - Backend: Node.js, Express, FastAPI, Flask, Laravel
-    //               - Database/BaaS: MongoDB, Appwrite
-    //               - Automation & AI: n8n (Advanced), Gemini, Chatgpt, Google Drive API Integration
-    //               - Workflow Tools: GIT/GitHub, Clerk, Monday.com
-
-    //               # KEY PROJECTS & BUSINESS IMPACT
-    //               - Practice Management Engine: Developed a desktop solution using ElectronJS and MongoDB that digitized dental patient histories and payment tracking, directly reducing manual bookkeeping hours.
-    //               - RAKAPE & LuckyZDelicacies: Engineered full-stack e-commerce and CMS platforms using NextJS and Appwrite, featuring real-time menu management and automated order processing.
-    //               - Infrastructure & Support: Currently maintaining regional network infrastructure for DPWH Region 4A, ensuring 100% operational uptime for high-performance systems.
-
-    //               # PROFESSIONAL PHILOSOPHY
-    //               Noa focuses on "Solving Complex Chaos." He doesn't just write code; he architects solutions that eliminate business friction and increase revenue through smart automation.
-    //               `;
-
-    // Iterate through models if the previous one fails
-    for (const model of models) {
       try {
+        console.log(`[chat] Trying model: ${config.label}`);
+        const model = buildModel(config);
+
         const result = await streamText({
-          model: model,
+          model,
           system: systemPrompt,
           messages: coreMessages,
-          // Set short retry limits so it switches faster if a limit is hit
           maxRetries: 0,
+          abortSignal: AbortSignal.timeout(15_000),
         });
 
-        return result.toUIMessageStreamResponse();
-      } catch (error: any) {
-        lastError = error;
+        // Success — return stream
+        return result.toUIMessageStreamResponse({
+          headers: {
+            "X-Model-Used": config.label,
+            "X-Provider": config.provider,
+          },
+        });
+      } catch (err: any) {
+        lastError = err;
+        const errorMsg = err?.message?.toLowerCase() || "";
+        const status = err?.status || err?.statusCode;
 
-        // Check if error is a rate limit (429) or overload (503)
-        const isRateLimit = error?.status === 429 || error?.statusCode === 429;
-        const isOverloaded = error?.status === 503 || error?.statusCode === 503;
+        // DETECTION LOGIC: Catch quota, auth, and overload errors
+        const isQuotaError =
+          errorMsg.includes("quota") ||
+          errorMsg.includes("limit") ||
+          status === 429;
+        const isAuthError = status === 401 || status === 403;
+        const isOverloaded = status === 503 || status === 529;
 
-        if (isRateLimit || isOverloaded) {
+        if (isQuotaError || isAuthError || isOverloaded) {
           console.warn(
-            `Switching model due to: ${error.status}. Trying next provider...`,
+            `[chat] Switching from ${config.label} due to: ${errorMsg || status}`,
           );
-          continue; // Move to the next model in the array
+          blockModel(config.modelId, 5 * 60 * 1000); // 5 min cooldown
+          continue;
         }
 
-        // If it's a different kind of error (like a 400), throw it immediately
-        throw error;
+        if (status === 400) throw err; // Bad request, don't fallback
+        continue;
       }
     }
 
-    throw lastError;
-  } catch (error) {
-    console.error("All models exhausted or critical error:", error);
+    // All models failed
+    console.error("[chat] All models exhausted. Last error:", lastError);
+    return Response.json(
+      {
+        error:
+          "SYSTEM_OFFLINE: All providers are currently busy. Try again soon.",
+      },
+      { status: 503 },
+    );
+  } catch (err) {
+    console.error("[chat] Critical error:", err);
     return Response.json({ error: "SYSTEM_OFFLINE" }, { status: 500 });
   }
 }
