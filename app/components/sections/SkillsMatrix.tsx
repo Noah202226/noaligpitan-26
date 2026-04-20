@@ -13,7 +13,7 @@ const SkillsMatrix = () => {
       level: 92,
     },
     {
-      category: "Server-Side Logic",
+      category: "Backend & API Design",
       id: "BE_LOG",
       skills: UNIFIED_DATA.stack.backend,
       level: 95,
@@ -25,7 +25,7 @@ const SkillsMatrix = () => {
       level: 88,
     },
     {
-      category: "Automation & Neural",
+      category: "Automation & AI",
       id: "AI_AUT",
       skills: UNIFIED_DATA.stack.automation_ai,
       level: 98,

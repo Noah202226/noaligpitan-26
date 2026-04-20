@@ -13,7 +13,7 @@ export const UNIFIED_DATA = {
   },
   stack: {
     frontend: ["ReactJS", "NextJS", "DaisyUI", "Schadcn", "ElectronJS"],
-    backend: ["Node.js", "Express", "FastAPI", "Flask", "Laravel"],
+    backend: ["Node.js", "Express", "FastAPI", "Flask"],
     database: ["MongoDB", "Appwrite", "Convex"],
     automation_ai: [
       "n8n (Advanced)",
