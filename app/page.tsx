@@ -96,7 +96,7 @@ export default function Home() {
               <div className="absolute inset-0 z-0 overflow-hidden ">
                 <div className="absolute -inset-12 bg-blue-600/20 rounded-full blur-3xl group-hover:bg-blue-500/40 transition-all duration-700 " />
                 <img
-                  src="/prof.jpg"
+                  src="/k-prof.jpg"
                   alt={UNIFIED_DATA.identity.name}
                   className="relative w-full h-full object-cover grayscale-50 group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
                 />
