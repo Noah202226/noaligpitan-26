@@ -6,7 +6,7 @@
 
 ## 1. Overview & Tech Stack
 
-- **App Name:** `noaligpitan-dev26` — Interactive 3D & AI-powered developer portfolio for **Noa Ligpitan** (*Full-Stack Developer & Business Automation Architect*).
+- **App Name:** `noaligpitan-dev26` — Interactive 3D & AI-powered developer portfolio for **Noa Ligpitan** (_Full-Stack Developer & Business Automation Architect_).
 - **Core Stack:**
   - **Framework:** Next.js `16.2.2` (App Router) + React `19.2.4` + TypeScript `5`
   - **Styling & Motion:** Tailwind CSS `v4` (`@tailwindcss/postcss`), Framer Motion `12`, Lucide Icons, React Icons
@@ -24,9 +24,10 @@ noaligpitan-dev26/
 ├── CLAUDE.md                           # Imports @AGENTS.md
 ├── .agents/
 │   └── skills/
-│       ├── sync-app-context/SKILL.md   # Workflow: scan repo & update this context doc
+│       ├── sync-app-context/SKILL.md      # Workflow: scan repo & update this context doc
 │       ├── add-portfolio-feature/SKILL.md # Workflow: build, verify & track new features
-│       └── update-portfolio-data/SKILL.md # Workflow: update UNIFIED_DATA & AI knowledge base
+│       ├── update-portfolio-data/SKILL.md # Workflow: update UNIFIED_DATA & AI knowledge base
+│       └── git-commit-push/SKILL.md       # Workflow: scan diff, suggest commit msg, approve & push
 ├── docs/
 │   └── APP_CONTEXT.md                  # This file (architecture + feature tracker)
 ├── app/
@@ -53,16 +54,16 @@ noaligpitan-dev26/
 
 ## 3. Feature Inventory & Status
 
-| Feature | Status | Key Files | Notes |
-| :--- | :--- | :--- | :--- |
-| **3-Column HUD Portfolio Layout** | Active | `app/page.tsx` | Identity card (rotating availability ticker, socials, stats), center dynamic section switcher (`mission`, `projects`, `experience`, `credentials`), right `ARKI_AI` chat. |
-| **Interactive 3D Background (`NeuralGrid`)** | Active | `app/components/Scene.tsx` | 2,000 additive particles, wireframe cube, lit core sphere; tracks window mouse position with lerp smoothing. |
-| **Unified Data & AI Knowledge Base** | Active | `app/lib/data.js` | `UNIFIED_DATA` powers both UI sections and `getAiKnowledgeBase()` for the AI system prompt. |
-| **Skills Matrix HUD** | Active | `app/components/sections/SkillsMatrix.tsx` | Renders categorized tech stack proficiency bars (`Frontend`, `Backend`, `Database`, `Automation & AI`) inside `Chat.tsx`. |
-| **`ARKI_AI` Streaming Chat UI** | Active | `app/components/Chat.tsx` | Vercel AI SDK `useChat`, quick-action prompts, active model badge, abort button, reasoning-state indicator, fallback banner, and inline `SYSTEM_ALERT` card with diagnostics & retry. |
-| **Multi-Provider Free-Tier AI Backend** | Active | `app/api/chat/route.ts` | Preflight stream verification (`startVerifiedStream`), ASCII-safe response headers, per-model cooldowns, per-IP rate limit (25 req/hr). Chain: Groq (`qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, `openai/gpt-oss-120b`) -> Google (`gemini-2.5-flash-lite`, `gemini-2.5-flash`) -> OpenRouter (`openrouter/free`) -> Cerebras (`gpt-oss-120b`) -> Mistral (`mistral-small-latest`). |
-| **Database / Persistence** | Not Added | — | No DB installed yet; portfolio content is static and chat history resets on reload. |
-| **Data & Unused File Cleanup** | Pending | `app/lib/data.js`, `app/components/` | Placeholder projects (`LuckyZDelicacies2`, `LuckyZDelicacies23`, `RAKAPE & `), typo (`Schadcn`), and unused prototypes (`Navbar.tsx`, `FeatureWork.tsx`, `streaming-text.ts`). |
+| Feature                                      | Status    | Key Files                                  | Notes                                                                                                                                                                                                                                                                                                                                                                             |
+| :------------------------------------------- | :-------- | :----------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **3-Column HUD Portfolio Layout**            | Active    | `app/page.tsx`                             | Identity card (rotating availability ticker, socials, stats), center dynamic section switcher (`mission`, `projects`, `experience`, `credentials`), right `ARKI_AI` chat.                                                                                                                                                                                                         |
+| **Interactive 3D Background (`NeuralGrid`)** | Active    | `app/components/Scene.tsx`                 | 2,000 additive particles, wireframe cube, lit core sphere; tracks window mouse position with lerp smoothing.                                                                                                                                                                                                                                                                      |
+| **Unified Data & AI Knowledge Base**         | Active    | `app/lib/data.js`                          | `UNIFIED_DATA` powers both UI sections and `getAiKnowledgeBase()` for the AI system prompt.                                                                                                                                                                                                                                                                                       |
+| **Skills Matrix HUD**                        | Active    | `app/components/sections/SkillsMatrix.tsx` | Renders categorized tech stack proficiency bars (`Frontend`, `Backend`, `Database`, `Automation & AI`) inside `Chat.tsx`.                                                                                                                                                                                                                                                         |
+| **`ARKI_AI` Streaming Chat UI**              | Active    | `app/components/Chat.tsx`                  | Vercel AI SDK `useChat`, quick-action prompts, active model badge, abort button, reasoning-state indicator, fallback banner, and inline `SYSTEM_ALERT` card with diagnostics & retry.                                                                                                                                                                                             |
+| **Multi-Provider Free-Tier AI Backend**      | Active    | `app/api/chat/route.ts`                    | Preflight stream verification (`startVerifiedStream`), ASCII-safe response headers, per-model cooldowns, per-IP rate limit (25 req/hr). Chain: Groq (`qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, `openai/gpt-oss-120b`) -> Google (`gemini-2.5-flash-lite`, `gemini-2.5-flash`) -> OpenRouter (`openrouter/free`) -> Cerebras (`gpt-oss-120b`) -> Mistral (`mistral-small-latest`). |
+| **Database / Persistence**                   | Not Added | —                                          | No DB installed yet; portfolio content is static and chat history resets on reload.                                                                                                                                                                                                                                                                                               |
+| **Data & Unused File Cleanup**               | Pending   | `app/lib/data.js`, `app/components/`       | Placeholder projects (`LuckyZDelicacies2`, `LuckyZDelicacies23`, `RAKAPE & `), typo (`Schadcn`), and unused prototypes (`Navbar.tsx`, `FeatureWork.tsx`, `streaming-text.ts`).                                                                                                                                                                                                    |
 
 ---
 
@@ -70,14 +71,14 @@ noaligpitan-dev26/
 
 Only configure the providers you want active — unconfigured providers are skipped automatically:
 
-| Variable | Provider | Required? |
-| :--- | :--- | :--- |
-| `GROQ_API_KEY` | Groq (Primary) | At least one provider key required |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Google AI Studio / Gemini | Optional (recommended fallback) |
-| `OPENROUTER_API_KEY` | OpenRouter (`openrouter/free`) | Optional |
-| `CEREBRAS_API_KEY` | Cerebras | Optional |
-| `MISTRAL_API_KEY` | Mistral | Optional |
-| `NEXT_PUBLIC_SITE_URL` | Used as OpenRouter `HTTP-Referer` | Optional (defaults to `http://localhost:3000`) |
+| Variable                       | Provider                          | Required?                                      |
+| :----------------------------- | :-------------------------------- | :--------------------------------------------- |
+| `GROQ_API_KEY`                 | Groq (Primary)                    | At least one provider key required             |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google AI Studio / Gemini         | Optional (recommended fallback)                |
+| `OPENROUTER_API_KEY`           | OpenRouter (`openrouter/free`)    | Optional                                       |
+| `CEREBRAS_API_KEY`             | Cerebras                          | Optional                                       |
+| `MISTRAL_API_KEY`              | Mistral                           | Optional                                       |
+| `NEXT_PUBLIC_SITE_URL`         | Used as OpenRouter `HTTP-Referer` | Optional (defaults to `http://localhost:3000`) |
 
 ---
 
@@ -100,4 +101,4 @@ Only configure the providers you want active — unconfigured providers are skip
   - Fixed lazy `streamText` fallback bug in `app/api/chat/route.ts` via `startVerifiedStream()`.
   - Added structured error classification, per-model cooldowns, ASCII-safe `X-Fallback-Notice` header, and a 5-provider free-tier `MODEL_CHAIN` verified against active Groq (`qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, `openai/gpt-oss-120b`) and Gemini (`gemini-2.5-flash-lite`, `gemini-2.5-flash`) models.
   - Added dynamic status header, fallback notice banner, reasoning indicator, and inline `SYSTEM_ALERT` error card (with provider diagnostics & retry) in `app/components/Chat.tsx`.
-  - Created AI project context (`docs/APP_CONTEXT.md`), updated `AGENTS.md`, and added workspace workflow skills under `.agents/skills/`.
+  - Created AI project context (`docs/APP_CONTEXT.md`), updated `AGENTS.md`, and added workspace workflow skills under `.agents/skills/` (including `git-commit-push`).
