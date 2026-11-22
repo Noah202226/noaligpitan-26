@@ -1,24 +1,117 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
   Terminal,
-  Zap,
   Cpu,
   AlertTriangle,
   MessageSquareCode,
   Sparkles,
   User,
   Briefcase,
+  RefreshCw,
+  X,
+  Info,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import SkillsMatrix from "./sections/SkillsMatrix";
 
+interface ProviderFailureDetail {
+  model: string;
+  provider?: string;
+  code?: string;
+  reason: string;
+}
+
+interface ChatErrorState {
+  code: string;
+  title: string;
+  message: string;
+  details?: ProviderFailureDetail[];
+}
+
+function getErrorTitle(code: string): string {
+  switch (code) {
+    case "RATE_LIMIT":
+      return "Rate Limit Reached";
+    case "ALL_PROVIDERS_FAILED":
+      return "AI Service Unavailable";
+    case "MODEL_NOT_FOUND":
+      return "AI Model Unavailable";
+    case "QUOTA_EXCEEDED":
+      return "Provider Quota Reached";
+    case "AUTH_ERROR":
+    case "MISSING_API_KEY":
+      return "AI Configuration Error";
+    case "TIMEOUT":
+      return "Request Timed Out";
+    case "NETWORK_ERROR":
+      return "Connection Failed";
+    default:
+      return "System Error";
+  }
+}
+
+function parseChatError(err: Error | undefined): ChatErrorState | null {
+  if (!err) return null;
+  const raw = err.message?.trim() || "";
+
+  // Attempt to parse structured JSON payloads from /api/chat
+  if (raw.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(raw) as {
+        code?: string;
+        error?: string;
+        details?: ProviderFailureDetail[];
+      };
+      const code = parsed.code || "SYSTEM_ERROR";
+      return {
+        code,
+        title: getErrorTitle(code),
+        message:
+          parsed.error ||
+          "The AI assistant could not process your request right now.",
+        details: Array.isArray(parsed.details) ? parsed.details : undefined,
+      };
+    } catch {
+      // Fall through to plain-text handling
+    }
+  }
+
+  const lower = raw.toLowerCase();
+  if (
+    lower.includes("failed to fetch") ||
+    lower.includes("networkerror") ||
+    lower.includes("network")
+  ) {
+    return {
+      code: "NETWORK_ERROR",
+      title: getErrorTitle("NETWORK_ERROR"),
+      message:
+        "Could not reach the server. Check your internet connection and try again.",
+    };
+  }
+
+  return {
+    code: "SYSTEM_ERROR",
+    title: "Request Failed",
+    message:
+      raw && raw !== "An error occurred."
+        ? raw
+        : "The AI assistant encountered an unexpected error. Please try again.",
+  };
+}
+
 export default function Chat() {
   const [input, setInput] = useState("");
   const [activeModel, setActiveModel] = useState<string | null>(null);
+  const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
+  const [httpError, setHttpError] = useState<ChatErrorState | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -46,19 +139,69 @@ export default function Chat() {
     },
   ];
 
-  const { messages, sendMessage, status, error, stop } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      fetch: async (url, options) => {
-        const response = await fetch(url, options);
-        if (response.ok) {
-          const modelUsed = response.headers.get("X-Model-Used");
-          if (modelUsed) setActiveModel(modelUsed);
-        }
-        return response;
-      },
-    }),
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        fetch: async (url, options) => {
+          const response = await fetch(url, options);
+          if (response.ok) {
+            setHttpError(null);
+            setShowDetails(false);
+            const modelUsed = response.headers.get("X-Model-Used");
+            if (modelUsed) setActiveModel(modelUsed);
+            const notice = response.headers.get("X-Fallback-Notice");
+            setFallbackNotice(notice || null);
+          } else {
+            try {
+              const data = (await response.clone().json()) as {
+                code?: string;
+                error?: string;
+                details?: ProviderFailureDetail[];
+              };
+              const code = data.code || `HTTP_${response.status}`;
+              setHttpError({
+                code,
+                title: getErrorTitle(code),
+                message:
+                  data.error ||
+                  `Server responded with status ${response.status}.`,
+                details: Array.isArray(data.details) ? data.details : undefined,
+              });
+            } catch {
+              setHttpError({
+                code: `HTTP_${response.status}`,
+                title: "Server Error",
+                message: `Request failed with HTTP ${response.status}. Please try again.`,
+              });
+            }
+          }
+          return response;
+        },
+      }),
+    [],
+  );
+
+  const {
+    messages,
+    sendMessage,
+    regenerate,
+    clearError,
+    status,
+    error,
+    stop,
+  } = useChat({
+    transport,
   });
+
+  const activeError = httpError ?? parseChatError(error);
+
+  // Auto-dismiss fallback notice after 8 seconds
+  useEffect(() => {
+    if (!fallbackNotice) return;
+    const timer = setTimeout(() => setFallbackNotice(null), 8000);
+    return () => clearTimeout(timer);
+  }, [fallbackNotice]);
 
   // FOCUS ON LOAD
   useEffect(() => {
@@ -67,7 +210,7 @@ export default function Chat() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, status]);
+  }, [messages, status, activeError]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -76,9 +219,25 @@ export default function Chat() {
     }
   }, [input]);
 
+  const dismissError = () => {
+    setHttpError(null);
+    setShowDetails(false);
+    clearError();
+  };
+
+  const handleRetry = () => {
+    dismissError();
+    if (messages.length > 0) {
+      regenerate();
+    } else {
+      textareaRef.current?.focus();
+    }
+  };
+
   const handleSubmit = (textOverride?: string) => {
     const finalInput = textOverride || input;
     if (!finalInput.trim() || status === "streaming") return;
+    dismissError();
     sendMessage({ text: finalInput });
     setInput("");
   };
@@ -91,6 +250,32 @@ export default function Chat() {
   };
 
   const isBusy = status === "submitted" || status === "streaming";
+
+  const statusMeta = activeError
+    ? {
+        label: "Error",
+        textClass: "text-red-400",
+        dotClass: "bg-red-500 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.6)]",
+      }
+    : isBusy
+      ? {
+          label: "Processing",
+          textClass: "text-yellow-400",
+          dotClass:
+            "bg-yellow-500 animate-pulse shadow-[0_0_12px_rgba(234,179,8,0.6)]",
+        }
+      : fallbackNotice
+        ? {
+            label: "Fallback Active",
+            textClass: "text-amber-400",
+            dotClass: "bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.5)]",
+          }
+        : {
+            label: "Ready",
+            textClass: "text-emerald-500",
+            dotClass:
+              "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]",
+          };
 
   return (
     <div className="flex flex-col w-full max-w-5xl mx-auto h-187.5 bg-[#050505] border border-white/10 rounded-xl overflow-hidden relative shadow-[0_0_50px_-12px_rgba(234,179,8,0.15)] transition-all duration-500">
@@ -108,7 +293,8 @@ export default function Chat() {
               ARKI_AI
             </span>
             <span className="text-[8px] font-mono text-slate-500 tracking-widest uppercase">
-              System Status: <span className="text-emerald-500">Ready</span>
+              System Status:{" "}
+              <span className={statusMeta.textClass}>{statusMeta.label}</span>
             </span>
           </div>
         </div>
@@ -128,11 +314,34 @@ export default function Chat() {
               </motion.div>
             )}
           </AnimatePresence>
-          <div
-            className={`w-2.5 h-2.5 rounded-full ${isBusy ? "bg-yellow-500 animate-pulse" : "bg-emerald-500"} shadow-[0_0_12px_rgba(234,179,8,0.4)]`}
-          />
+          <div className={`w-2.5 h-2.5 rounded-full ${statusMeta.dotClass}`} />
         </div>
       </div>
+
+      {/* NOTIFICATION BAR (FALLBACK / ERROR TOAST) */}
+      <AnimatePresence>
+        {fallbackNotice && !activeError && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            role="status"
+            className="px-5 py-2.5 bg-amber-500/10 border-b border-amber-500/25 flex items-center justify-between gap-3 text-[11px] font-mono text-amber-200"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Info size={14} className="text-amber-400 shrink-0" />
+              <span className="truncate">{fallbackNotice}</span>
+            </div>
+            <button
+              onClick={() => setFallbackNotice(null)}
+              aria-label="Dismiss notice"
+              className="text-amber-400/70 hover:text-amber-200 transition-colors shrink-0"
+            >
+              <X size={14} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* MESSAGES AREA - WIDER CONTAINER */}
       <div className="flex-1 overflow-y-auto p-8 space-y-10 scrollbar-hide bg-[radial-gradient(circle_at_50%_0%,rgba(234,179,8,0.03),transparent)]">
@@ -144,39 +353,150 @@ export default function Chat() {
           <SkillsMatrix />
         </motion.div>
 
-        {messages.map((m) => (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            key={m.id}
-            className={`flex flex-col gap-3 ${m.role === "user" ? "items-end pl-12" : "items-start pr-12"}`}
-          >
-            <div className="flex items-center gap-2 px-2">
-              {m.role !== "user" && (
-                <MessageSquareCode size={12} className="text-yellow-500/50" />
-              )}
-              <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-600">
-                {m.role === "user" ? "Local_Access" : "Arki_System_Log"}
-              </span>
-            </div>
-            <div
-              className={`p-5 rounded-xl font-mono text-[14px] leading-[1.6] shadow-sm transition-all ${
-                m.role === "user"
-                  ? "bg-yellow-500/5 border border-yellow-500/20 text-yellow-50 text-right rounded-tr-none"
-                  : "bg-white/3 border border-white/10 text-slate-300 rounded-tl-none backdrop-blur-sm"
-              }`}
+        {messages.map((m) => {
+          const textParts = m.parts.filter(
+            (part) => part.type === "text" && part.text.length > 0,
+          );
+          const hasReasoningOnly =
+            m.role !== "user" &&
+            textParts.length === 0 &&
+            m.parts.some((part) => part.type === "reasoning");
+
+          if (m.role !== "user" && textParts.length === 0 && !hasReasoningOnly) {
+            return null;
+          }
+
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              key={m.id}
+              className={`flex flex-col gap-3 ${m.role === "user" ? "items-end pl-12" : "items-start pr-12"}`}
             >
-              {m.parts.map(
-                (part, i) =>
-                  part.type === "text" && (
-                    <div key={i} className="whitespace-pre-wrap">
-                      {part.text}
-                    </div>
-                  ),
+              <div className="flex items-center gap-2 px-2">
+                {m.role !== "user" && (
+                  <MessageSquareCode size={12} className="text-yellow-500/50" />
+                )}
+                <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-600">
+                  {m.role === "user" ? "Local_Access" : "Arki_System_Log"}
+                </span>
+              </div>
+              <div
+                className={`p-5 rounded-xl font-mono text-[14px] leading-[1.6] shadow-sm transition-all ${
+                  m.role === "user"
+                    ? "bg-yellow-500/5 border border-yellow-500/20 text-yellow-50 text-right rounded-tr-none"
+                    : "bg-white/3 border border-white/10 text-slate-300 rounded-tl-none backdrop-blur-sm"
+                }`}
+              >
+                {hasReasoningOnly ? (
+                  <span className="text-xs text-slate-500 italic animate-pulse">
+                    Synthesizing response...
+                  </span>
+                ) : (
+                  m.parts.map(
+                    (part, i) =>
+                      part.type === "text" && (
+                        <div key={i} className="whitespace-pre-wrap">
+                          {part.text}
+                        </div>
+                      ),
+                  )
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+
+        {/* INLINE ERROR FEEDBACK CARD */}
+        <AnimatePresence>
+          {activeError && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              role="alert"
+              className="rounded-xl border border-red-500/35 bg-red-950/30 p-5 font-mono text-left backdrop-blur-md space-y-3"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <AlertTriangle
+                    size={16}
+                    className="text-red-400 shrink-0"
+                  />
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-red-400 font-bold">
+                      SYSTEM_ALERT // {activeError.code}
+                    </p>
+                    <p className="text-xs text-red-100 font-bold mt-0.5">
+                      {activeError.title}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={dismissError}
+                  aria-label="Dismiss error"
+                  className="text-red-300/60 hover:text-red-200 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <p className="text-[12px] text-red-200/90 leading-relaxed">
+                {activeError.message}
+              </p>
+
+              {activeError.details && activeError.details.length > 0 && (
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowDetails((prev) => !prev)}
+                    className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-red-300/80 hover:text-red-200 transition-colors"
+                  >
+                    {showDetails ? (
+                      <ChevronUp size={12} />
+                    ) : (
+                      <ChevronDown size={12} />
+                    )}
+                    {showDetails ? "Hide" : "Show"} provider diagnostics (
+                    {activeError.details.length})
+                  </button>
+
+                  {showDetails && (
+                    <ul className="mt-2 space-y-1.5 rounded-lg bg-black/40 border border-red-500/20 p-3 text-[11px] text-red-200/80">
+                      {activeError.details.map((d, idx) => (
+                        <li key={idx} className="flex flex-col">
+                          <span className="text-red-300 font-bold">
+                            [{d.model}]
+                          </span>
+                          <span className="text-slate-300">{d.reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               )}
-            </div>
-          </motion.div>
-        ))}
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  disabled={isBusy}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-500/40 text-red-100 hover:bg-red-500/35 text-[10px] uppercase tracking-widest transition-all disabled:opacity-40"
+                >
+                  <RefreshCw size={12} />
+                  Retry Request
+                </button>
+                <button
+                  type="button"
+                  onClick={dismissError}
+                  className="px-3 py-1.5 rounded-lg border border-white/10 text-slate-400 hover:text-white text-[10px] uppercase tracking-widest transition-all"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {isBusy && (
           <div className="flex items-center gap-4 px-2 text-yellow-500/60 font-mono text-[10px] tracking-widest uppercase">
