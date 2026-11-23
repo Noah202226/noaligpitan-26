@@ -46,3 +46,12 @@
 - **Context:** Clicking *"Ask ARKI_AI"* on a service card needs to open the floating chat modal and submit a prompt immediately. Driving that through a prop + `useEffect` calling `setState` triggers React 19 / ESLint `react-hooks/set-state-in-effect` issues and extra render cycles.
 - **Decision:** Expose `ChatHandle` (`openWithPrompt(prompt: string)`) via `useImperativeHandle` on `Chat.tsx` and invoke `chatRef.current?.openWithPrompt(prompt)` directly inside click handlers.
 - **Consequence:** Deterministic, zero-effect-cascade opening and prompt submission with clean React 19 lint compliance.
+
+---
+
+## ADR-006: Executive Slate & Electric Cyan Typography and Color System
+- **Date:** 2026-11-23
+- **Files:** `app/layout.tsx`, `app/globals.css`, `app/components/Scene.tsx`, `app/page.tsx`, `app/components/Chat.tsx`, `app/components/sections/*.tsx`
+- **Context:** `app/globals.css` previously overrode `body` with `Arial, Helvetica, sans-serif`, and heavy ALL-CAPS monospace + 6 competing accent colors on ultra-transparent (`bg-white/[0.03]`) panels reduced scannability and let the 3D orb bleed behind text.
+- **Decision:** Adopt `Plus Jakarta Sans` (`--font-display`) for Title Case headings, `Inter` (`--font-sans`) for body/UI/chat prose, and `JetBrains Mono` (`--font-mono`) strictly for code, file paths, dates, and tech badges; enforce a 60/30/10 Executive Slate palette (`#090D16` canvas, `bg-[#0d1424]/90` frosted main panel, `bg-slate-800/55` cards, Sky Cyan `#38BDF8` primary navigation/accents, Warm Amber `#F59E0B` primary CTAs, Emerald/Rose strictly for semantic states) with icon-assisted Title Case navigation tabs.
+- **Consequence:** High-contrast, fast-scanning reading hierarchy while preserving the 3D `NeuralGrid` ambiance around the edges.

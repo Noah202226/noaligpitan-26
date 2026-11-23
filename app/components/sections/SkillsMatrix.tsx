@@ -38,7 +38,7 @@ const SkillsMatrix = () => {
   ];
 
   return (
-    <div className="w-full space-y-5 font-mono">
+    <div className="w-full space-y-6">
       {/* CORE OPERATIONAL CAPABILITIES */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         {UNIFIED_DATA.capabilities.map((cap, idx) => (
@@ -47,12 +47,12 @@ const SkillsMatrix = () => {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.04 }}
-            className="p-4 rounded-sm bg-blue-500/8 border border-blue-400/25 space-y-1.5"
+            className="p-4 rounded-lg bg-sky-500/8 border border-sky-400/25 space-y-1.5"
           >
-            <p className="text-xs sm:text-sm font-black text-blue-300 uppercase tracking-wide">
+            <p className="font-display text-sm font-bold text-sky-300 tracking-tight">
               {cap.title}
             </p>
-            <p className="text-xs sm:text-sm font-sans text-slate-200 leading-relaxed">
+            <p className="text-sm text-slate-300 leading-relaxed">
               {cap.detail}
             </p>
           </motion.div>
@@ -60,37 +60,37 @@ const SkillsMatrix = () => {
       </div>
 
       {/* TECHNICAL STACK MODULES */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {skillGroups.map((group, idx) => (
           <motion.div
             key={group.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            className={`p-4 sm:p-5 rounded-sm border border-white/12 bg-white/4 hover:border-yellow-500/40 hover:bg-white/6 transition-all group space-y-3 ${
+            className={`p-5 rounded-lg border border-slate-700/60 bg-slate-800/55 hover:border-sky-400/45 hover:bg-slate-800/75 transition-all group space-y-3.5 ${
               idx === skillGroups.length - 1 ? "md:col-span-2" : ""
             }`}
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-[11px] text-yellow-500/75 font-bold tracking-tight shrink-0">
-                  [{group.id}]
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="font-mono text-[11px] font-semibold text-sky-400/85 bg-sky-500/10 border border-sky-400/25 px-2 py-0.5 rounded shrink-0">
+                  {group.id}
                 </span>
-                <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wider group-hover:text-yellow-400 transition-colors truncate">
+                <h3 className="font-display text-base font-bold text-slate-50 group-hover:text-sky-300 transition-colors truncate">
                   {group.category}
                 </h3>
               </div>
 
               <div className="flex items-center gap-2.5 shrink-0">
-                <div className="h-1.5 w-24 sm:w-32 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-1.5 w-24 sm:w-28 bg-slate-900/90 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${group.level}%` }}
                     transition={{ duration: 0.9, ease: "circOut" }}
-                    className="h-full bg-linear-to-r from-amber-600 to-yellow-400"
+                    className="h-full bg-linear-to-r from-sky-500 to-cyan-300 rounded-full"
                   />
                 </div>
-                <span className="text-xs font-bold text-yellow-400 w-9 text-right">
+                <span className="font-mono text-xs font-semibold text-sky-300 w-9 text-right">
                   {group.level}%
                 </span>
               </div>
@@ -100,7 +100,7 @@ const SkillsMatrix = () => {
               {group.skills.map((skill) => (
                 <span
                   key={skill}
-                  className="px-2.5 py-1 text-xs text-slate-200 bg-black/45 border border-white/12 rounded-xs hover:border-blue-400/55 hover:text-white transition-colors"
+                  className="px-2.5 py-1 font-mono text-xs text-slate-200 bg-slate-900/75 border border-slate-700/70 rounded-md hover:border-sky-400/50 hover:text-white transition-colors"
                 >
                   {skill}
                 </span>

@@ -471,17 +471,10 @@ Keep responses concise and scannable.`;
           coreMessages,
         );
 
+        // Keep underlying model/provider names private on normal responses
         const headers: Record<string, string> = {
-          "X-Model-Used": toSafeHeaderValue(config.label),
-          "X-Provider": toSafeHeaderValue(config.provider),
+          "X-Chat-Status": toSafeHeaderValue("ok"),
         };
-
-        if (failedAttempts.length > 0) {
-          const skipped = failedAttempts.map((f) => f.model).join(", ");
-          headers["X-Fallback-Notice"] = toSafeHeaderValue(
-            `Primary model (${skipped}) unavailable - automatically switched to ${config.label}.`,
-          );
-        }
 
         return createUIMessageStreamResponse({
           stream: verifiedStream,

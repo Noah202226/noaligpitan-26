@@ -12,7 +12,10 @@ try {
   }
 
   const input = JSON.parse(raw);
-  const cmd = String(input?.toolCall?.args?.CommandLine ?? "").trim();
+  const args = input?.toolCall?.args ?? {};
+  const cmd = String(
+    args.CommandLine ?? args.commandLine ?? args.command ?? ""
+  ).trim();
 
   // 1. HARD DENY — secret leaks & destructive git rewrites
   const denyRules = [
@@ -21,6 +24,11 @@ try {
         /\b(cat|type|more|less|head|tail|get-content|gc)\b[^\n|;&]*\.env(\.[a-z0-9_-]+)?\b/i,
       reason:
         "Blocked by command-policy: Do not dump raw .env/.env.local contents. Inspect variable names only.",
+    },
+    {
+      pattern: /\bgit\s+diff\b[^\n|;&]*\.env(\.[a-z0-9_-]+)?\b/i,
+      reason:
+        "Blocked by command-policy: Do not inspect raw .env/.env.local diffs.",
     },
     {
       pattern: /\bgit\s+add\b[^\n|;&]*\.env(\.[a-z0-9_-]+)?\b/i,
@@ -66,31 +74,62 @@ try {
     }
   }
 
-  // 3. AUTO-ALLOW — safe read-only checks, build verification, and approved git-commit-push flow
-  // (Single-prompt UX: git-commit-push already asks once via ask_question before running this.)
+  // 3. AUTO-ALLOW — strictly scoped to git-commit-push skill commands only
+  // (Read-only git scan/diff + build-gated push script after user approves via ask_question.)
   const segments = cmd
     .split(/(?:;|&&|\|\|)/)
     .map((s) => s.trim())
     .filter(Boolean);
 
+  function isSafeGitDiff(seg) {
+    if (!/^git\s+diff(?:\s|$)/i.test(seg)) return false;
+    if (/[|&;><$`\r\n(){}]/.test(seg)) return false;
+    if (
+      /(?:^|\s)(?:--output(?:=|\s|$)|--ext-diff\b|--no-index\b|--textconv\b|-c\b)/i.test(
+        seg
+      )
+    ) {
+      return false;
+    }
+    if (/\.env(\.[a-z0-9_-]+)?\b/i.test(seg)) return false;
+    return true;
+  }
+
   const safeSegmentPatterns = [
-    /^git\s+(status|diff|log|branch|check-ignore)\b/i,
-    /^git\s+add\s+\.$/i,
-    /^git\s+commit\s+-m\s+["'][^"'`$\r\n]+["']$/i,
-    /^git\s+push(?:\s+origin\s+[a-zA-Z0-9._/-]+)?$/i,
-    /^npm(\.cmd)?\s+run\s+build$/i,
-    /^node\s+node_modules\/next\/dist\/bin\/next\s+build$/i,
-    /^node\s+node_modules\/typescript\/bin\/tsc\s+--noEmit\b/i,
-    /^node\s+node_modules\/eslint\/bin\/eslint\.js\b/i,
-    /^if\s*\(\s*\$LASTEXITCODE\s*-ne\s*0\s*\)\s*\{\s*exit\s+\$LASTEXITCODE\s*\}$/i,
-    /^if\s*\(\s*\$LASTEXITCODE\s*-eq\s*0\s*\)\s*\{\s*(git\s+add\s+\.|git\s+commit\s+-m\s+["'][^"'`$\r\n]+["']|git\s+push(?:\s+origin\s+[a-zA-Z0-9._/-]+)?|node\s+node_modules\/eslint\/bin\/eslint\.js\b[^}]*)\s*\}$/i,
+    /^git\s+status(?:\s+(?:--short|-s|-sb|--porcelain|-u(?:all|normal|no)?|--untracked-files(?:=(?:all|normal|no))?|--branch|-b))*$/i,
+    /^git\s+branch\s+--show-current$/i,
+    /^git\s+log(?:\s+(?:-n\s*\d+|-\d+|--oneline|--stat|--no-decorate|--decorate))*$/i,
+    /^git\s+ls-files(?:\s+(?:--others|-o|--exclude-standard|--modified|-m|--cached|-c|--deleted|-d))*$/i,
+    /^node\s+\.agents[\\/]scripts[\\/]build-and-push\.mjs\s+(?:"[^"`$\r\n]+"|'[^'`$\r\n]+')$/i,
   ];
 
-  if (
-    segments.length > 0 &&
-    segments.every((seg) => safeSegmentPatterns.some((re) => re.test(seg)))
-  ) {
-    respond({ decision: "allow" });
+  const isSafeSegment = (seg) =>
+    isSafeGitDiff(seg) || safeSegmentPatterns.some((re) => re.test(seg));
+
+  function overrideForSegment(seg) {
+    if (/^git\s+diff\b/i.test(seg)) return "command(git diff)";
+    if (/^git\s+status\b/i.test(seg)) return "command(git status)";
+    if (/^git\s+branch\b/i.test(seg)) return "command(git branch --show-current)";
+    if (/^git\s+log\b/i.test(seg)) return "command(git log)";
+    if (/^git\s+ls-files\b/i.test(seg)) return "command(git ls-files)";
+    if (/^node\s+\.agents[\\/]scripts[\\/]build-and-push\.mjs\b/i.test(seg)) {
+      return "command(node .agents/scripts/build-and-push.mjs)";
+    }
+    return `command(${seg})`;
+  }
+
+  if (segments.length > 0 && segments.every(isSafeSegment)) {
+    const permissionOverrides = [
+      ...new Set([
+        `command(${cmd})`,
+        ...segments.map((seg) => `command(${seg})`),
+        ...segments.map(overrideForSegment),
+      ]),
+    ];
+    respond({
+      decision: "allow",
+      permissionOverrides,
+    });
     process.exit(0);
   }
 

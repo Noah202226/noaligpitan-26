@@ -18,7 +18,6 @@ import {
   Briefcase,
   RefreshCw,
   X,
-  Info,
   ChevronDown,
   ChevronUp,
   Maximize2,
@@ -113,15 +112,11 @@ function parseChatError(err: Error | undefined): ChatErrorState | null {
   };
 }
 
-function renderFormattedLine(line: string, lineIndex: number) {
-  const trimmed = line.trim();
-  const isBullet = /^[-*•]\s+/.test(trimmed);
-  const content = isBullet ? trimmed.replace(/^[-*•]\s+/, "") : line;
-
-  const segments = content.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((seg, i) => {
+function renderInlineSegments(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((seg, i) => {
     if (seg.startsWith("**") && seg.endsWith("**")) {
       return (
-        <strong key={i} className="text-white font-bold">
+        <strong key={i} className="text-slate-50 font-semibold">
           {seg.slice(2, -2)}
         </strong>
       );
@@ -130,7 +125,7 @@ function renderFormattedLine(line: string, lineIndex: number) {
       return (
         <code
           key={i}
-          className="px-1 py-0.5 rounded-xs bg-white/10 text-yellow-300 text-[11px]"
+          className="px-1.5 py-0.5 rounded bg-slate-900/90 border border-slate-700/70 font-mono text-sky-300 text-xs"
         >
           {seg.slice(1, -1)}
         </code>
@@ -138,21 +133,54 @@ function renderFormattedLine(line: string, lineIndex: number) {
     }
     return seg;
   });
+}
 
+function renderFormattedLine(line: string, lineIndex: number) {
+  const trimmed = line.trim();
+
+  if (trimmed === "") {
+    return <div key={lineIndex} className="h-2" />;
+  }
+
+  // Markdown headings (# / ## / ###)
+  const headingMatch = trimmed.match(/^#{1,3}\s+(.+)$/);
+  if (headingMatch) {
+    return (
+      <p
+        key={lineIndex}
+        className="font-display text-sm sm:text-[15px] font-bold text-slate-50 pt-1.5 pb-0.5 tracking-tight"
+      >
+        {renderInlineSegments(headingMatch[1])}
+      </p>
+    );
+  }
+
+  // Bullet list items
+  const isBullet = /^[-*•]\s+/.test(trimmed);
   if (isBullet) {
+    const content = trimmed.replace(/^[-*•]\s+/, "");
     return (
       <div key={lineIndex} className="flex items-start gap-2 pl-1">
-        <span className="text-yellow-400/70 select-none">•</span>
-        <span className="flex-1">{segments}</span>
+        <span className="text-sky-400 select-none mt-0.5">•</span>
+        <span className="flex-1">{renderInlineSegments(content)}</span>
       </div>
     );
   }
 
-  return (
-    <div key={lineIndex} className={trimmed === "" ? "h-2" : undefined}>
-      {segments}
-    </div>
-  );
+  // Numbered list items
+  const numMatch = trimmed.match(/^(\d+\.)\s+(.+)$/);
+  if (numMatch) {
+    return (
+      <div key={lineIndex} className="flex items-start gap-2 pl-1">
+        <span className="font-mono text-xs text-sky-400 font-semibold select-none mt-0.5">
+          {numMatch[1]}
+        </span>
+        <span className="flex-1">{renderInlineSegments(numMatch[2])}</span>
+      </div>
+    );
+  }
+
+  return <div key={lineIndex}>{renderInlineSegments(line)}</div>;
 }
 
 export interface ChatHandle {
@@ -167,10 +195,8 @@ export default function Chat({ ref }: ChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [input, setInput] = useState("");
-  const [activeModel, setActiveModel] = useState<string | null>(null);
-  const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
   const [httpError, setHttpError] = useState<ChatErrorState | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -206,12 +232,8 @@ export default function Chat({ ref }: ChatProps) {
           const response = await fetch(url, options);
           if (response.ok) {
             setHttpError(null);
-            setShowDetails(false);
-            const modelUsed = response.headers.get("X-Model-Used");
-            if (modelUsed) setActiveModel(modelUsed);
-            const notice = response.headers.get("X-Fallback-Notice");
-            setFallbackNotice(notice || null);
           } else {
+            setShowDetails(true);
             try {
               const data = (await response.clone().json()) as {
                 code?: string;
@@ -255,13 +277,6 @@ export default function Chat({ ref }: ChatProps) {
 
   const activeError = httpError ?? parseChatError(error);
 
-  // Auto-dismiss fallback notice after 8 seconds
-  useEffect(() => {
-    if (!fallbackNotice) return;
-    const timer = setTimeout(() => setFallbackNotice(null), 8000);
-    return () => clearTimeout(timer);
-  }, [fallbackNotice]);
-
   // Auto-focus textarea when modal opens
   useEffect(() => {
     if (!isOpen) return;
@@ -293,7 +308,6 @@ export default function Chat({ ref }: ChatProps) {
 
   const dismissError = () => {
     setHttpError(null);
-    setShowDetails(false);
     clearError();
   };
 
@@ -338,28 +352,22 @@ export default function Chat({ ref }: ChatProps) {
   const statusMeta = activeError
     ? {
         label: "Error",
-        textClass: "text-red-400",
-        dotClass: "bg-red-500 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.6)]",
+        textClass: "text-rose-400",
+        dotClass: "bg-rose-500 animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.6)]",
       }
     : isBusy
       ? {
-          label: "Processing",
-          textClass: "text-yellow-400",
+          label: "Thinking",
+          textClass: "text-sky-400",
           dotClass:
-            "bg-yellow-500 animate-pulse shadow-[0_0_12px_rgba(234,179,8,0.6)]",
+            "bg-sky-400 animate-pulse shadow-[0_0_12px_rgba(56,189,248,0.6)]",
         }
-      : fallbackNotice
-        ? {
-            label: "Fallback Active",
-            textClass: "text-amber-400",
-            dotClass: "bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.5)]",
-          }
-        : {
-            label: "Ready",
-            textClass: "text-emerald-500",
-            dotClass:
-              "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]",
-          };
+      : {
+          label: "Online",
+          textClass: "text-emerald-400",
+          dotClass:
+            "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]",
+        };
 
   return (
     <>
@@ -388,63 +396,49 @@ export default function Chat({ ref }: ChatProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`fixed z-50 flex flex-col bg-[#050505]/98 border border-white/20 rounded-xl overflow-hidden shadow-[0_20px_70px_-15px_rgba(0,0,0,0.9),0_0_40px_-12px_rgba(234,179,8,0.28)] ${
+            className={`fixed z-50 flex flex-col bg-[#0c1322]/98 border border-slate-700/80 rounded-2xl overflow-hidden shadow-[0_24px_72px_-16px_rgba(0,0,0,0.9),0_0_32px_-12px_rgba(56,189,248,0.22)] ${
               isExpanded
-                ? "inset-3 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[780px] sm:h-[720px] sm:max-h-[88vh]"
-                : "inset-3 sm:inset-auto sm:bottom-22 sm:right-6 sm:w-[460px] sm:h-[620px] sm:max-h-[calc(100vh-7rem)]"
+                ? "inset-3 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[860px] sm:h-[760px] sm:max-h-[90vh]"
+                : "inset-3 sm:inset-auto sm:bottom-22 sm:right-6 sm:w-[560px] lg:w-[620px] sm:h-[660px] sm:max-h-[calc(100vh-7rem)]"
             }`}
           >
-            {/* SCANLINE EFFECT */}
-            <div className="pointer-events-none absolute inset-0 z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(234,179,8,0.06),rgba(0,255,0,0.02),rgba(59,130,246,0.06))] bg-size-[100%_2px,3px_100%]" />
-
             {/* HEADER */}
-            <div className="px-4 py-3 border-b border-white/10 bg-white/3 flex items-center justify-between gap-2 backdrop-blur-xl shrink-0">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="p-1.5 bg-yellow-500/10 rounded-md border border-yellow-500/25 shrink-0">
-                  <Terminal size={14} className="text-yellow-400" />
+            <div className="px-5 py-3.5 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between gap-2 backdrop-blur-xl shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 bg-amber-500/12 rounded-lg border border-amber-400/30 shrink-0">
+                  <Terminal size={16} className="text-amber-400" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-mono tracking-[0.3em] text-white font-bold uppercase">
+                  <span className="font-display text-sm sm:text-base text-slate-50 font-bold tracking-tight leading-none">
                     ARKI_AI
                   </span>
-                  <span className="text-[8px] font-mono text-slate-400 tracking-widest uppercase flex items-center gap-1.5">
+                  <span className="text-xs text-slate-400 flex items-center gap-1.5 mt-1">
                     <span
                       className={`inline-block w-1.5 h-1.5 rounded-full ${statusMeta.dotClass}`}
                     />
                     <span className={statusMeta.textClass}>
                       {statusMeta.label}
                     </span>
+                    <span className="text-slate-600">&middot;</span>
+                    <span className="text-slate-400 truncate">
+                      Noa&apos;s Portfolio Assistant
+                    </span>
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-1.5 shrink-0">
-                <AnimatePresence>
-                  {activeModel && (
-                    <motion.div
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="hidden xs:flex sm:flex items-center gap-1.5 px-2 py-1 bg-white/4 border border-white/10 rounded-sm max-w-36"
-                    >
-                      <Cpu size={10} className="text-yellow-400/70 shrink-0" />
-                      <span className="text-[8px] font-mono text-slate-300 uppercase tracking-wider truncate">
-                        {activeModel}
-                      </span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
                 <button
                   type="button"
                   onClick={() => setIsExpanded((prev) => !prev)}
                   aria-label={isExpanded ? "Collapse chat" : "Expand chat"}
                   title={isExpanded ? "Compact popup" : "Expand modal"}
-                  className="hidden sm:inline-flex p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                  className="hidden sm:inline-flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   {isExpanded ? (
-                    <Minimize2 size={13} />
+                    <Minimize2 size={15} />
                   ) : (
-                    <Maximize2 size={13} />
+                    <Maximize2 size={15} />
                   )}
                 </button>
 
@@ -453,57 +447,34 @@ export default function Chat({ ref }: ChatProps) {
                   onClick={() => setIsOpen(false)}
                   aria-label="Close chat"
                   title="Close (Esc)"
-                  className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                 >
-                  <X size={15} />
+                  <X size={16} />
                 </button>
               </div>
             </div>
 
-            {/* NOTIFICATION BAR (FALLBACK TOAST) */}
-            <AnimatePresence>
-              {fallbackNotice && !activeError && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  role="status"
-                  className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/25 flex items-center justify-between gap-2 text-[10px] font-mono text-amber-200 shrink-0"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Info size={13} className="text-amber-400 shrink-0" />
-                    <span className="truncate">{fallbackNotice}</span>
-                  </div>
-                  <button
-                    onClick={() => setFallbackNotice(null)}
-                    aria-label="Dismiss notice"
-                    className="text-amber-400/70 hover:text-amber-200 transition-colors shrink-0"
-                  >
-                    <X size={13} />
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             {/* MESSAGES AREA */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(234,179,8,0.04),transparent)]">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.05),transparent)]">
               {messages.length === 0 && !activeError && (
                 <motion.div
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="h-full flex flex-col justify-center items-start gap-3 px-2 py-4 font-mono"
+                  className="h-full flex flex-col justify-center items-start gap-3 px-2 py-4"
                 >
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-xs bg-yellow-500/10 border border-yellow-500/25 text-[9px] uppercase tracking-[0.25em] text-yellow-400">
-                    <Sparkles size={11} />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-500/12 border border-sky-400/30 text-xs font-medium text-sky-300">
+                    <Sparkles size={12} />
                     AI Portfolio Assistant
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-sm text-slate-200 leading-relaxed">
                     Ask me anything about{" "}
-                    <span className="text-white font-bold">Noa Ligpitan</span> —
-                    projects, automation workflows, work experience, or
+                    <span className="text-white font-semibold">
+                      Noa Ligpitan
+                    </span>{" "}
+                    — projects, automation workflows, context engineering, or
                     technical stack.
                   </p>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     Pick a quick prompt below or type your question.
                   </p>
                 </motion.div>
@@ -536,19 +507,19 @@ export default function Chat({ ref }: ChatProps) {
                     <div className="flex items-center gap-1.5 px-1">
                       {m.role !== "user" && (
                         <MessageSquareCode
-                          size={11}
-                          className="text-yellow-500/50"
+                          size={12}
+                          className="text-sky-400"
                         />
                       )}
-                      <span className="text-[8px] font-mono uppercase tracking-[0.2em] text-slate-500">
+                      <span className="text-[11px] font-medium text-slate-400">
                         {m.role === "user" ? "You" : "ARKI_AI"}
                       </span>
                     </div>
                     <div
-                      className={`px-4 py-3 rounded-xl font-mono text-[13.5px] leading-[1.6] shadow-sm transition-all ${
+                      className={`px-4 py-3 rounded-xl text-sm leading-relaxed shadow-sm transition-all ${
                         m.role === "user"
-                          ? "bg-yellow-500/12 border border-yellow-500/30 text-yellow-50 text-right rounded-tr-xs"
-                          : "bg-white/5 border border-white/10 text-slate-200 rounded-tl-xs backdrop-blur-sm space-y-1"
+                          ? "bg-sky-500/15 border border-sky-400/35 text-slate-50 text-right rounded-tr-xs"
+                          : "bg-slate-800/80 border border-slate-700/70 text-slate-200 rounded-tl-xs space-y-1"
                       }`}
                     >
                       {hasReasoningOnly ? (
@@ -568,7 +539,7 @@ export default function Chat({ ref }: ChatProps) {
                         m.parts.map(
                           (part, i) =>
                             part.type === "text" && (
-                              <div key={i} className="space-y-0.5">
+                              <div key={i} className="space-y-1">
                                 {part.text
                                   .split("\n")
                                   .map((line, li) =>
@@ -591,19 +562,19 @@ export default function Chat({ ref }: ChatProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     role="alert"
-                    className="rounded-lg border border-red-500/35 bg-red-950/35 p-3.5 font-mono text-left backdrop-blur-md space-y-2.5"
+                    className="rounded-xl border border-rose-400/35 bg-rose-950/35 p-4 text-left backdrop-blur-md space-y-2.5"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <AlertTriangle
-                          size={15}
-                          className="text-red-400 shrink-0"
+                          size={16}
+                          className="text-rose-400 shrink-0"
                         />
                         <div>
-                          <p className="text-[9px] uppercase tracking-[0.2em] text-red-400 font-bold">
-                            SYSTEM_ALERT {"//"} {activeError.code}
+                          <p className="font-mono text-[10px] uppercase tracking-wider text-rose-400 font-semibold">
+                            Alert {"//"} {activeError.code}
                           </p>
-                          <p className="text-xs text-red-100 font-bold mt-0.5">
+                          <p className="font-display text-sm text-rose-100 font-bold mt-0.5">
                             {activeError.title}
                           </p>
                         </div>
@@ -611,13 +582,13 @@ export default function Chat({ ref }: ChatProps) {
                       <button
                         onClick={dismissError}
                         aria-label="Dismiss error"
-                        className="text-red-300/60 hover:text-red-200 transition-colors"
+                        className="text-rose-300/70 hover:text-rose-100 transition-colors cursor-pointer"
                       >
-                        <X size={13} />
+                        <X size={14} />
                       </button>
                     </div>
 
-                    <p className="text-[11px] text-red-200/90 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-rose-100/90 leading-relaxed">
                       {activeError.message}
                     </p>
 
@@ -626,22 +597,22 @@ export default function Chat({ ref }: ChatProps) {
                         <button
                           type="button"
                           onClick={() => setShowDetails((prev) => !prev)}
-                          className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-red-300/80 hover:text-red-200 transition-colors"
+                          className="flex items-center gap-1.5 font-mono text-[11px] text-rose-300 hover:text-rose-100 transition-colors cursor-pointer"
                         >
                           {showDetails ? (
-                            <ChevronUp size={12} />
+                            <ChevronUp size={13} />
                           ) : (
-                            <ChevronDown size={12} />
+                            <ChevronDown size={13} />
                           )}
                           {showDetails ? "Hide" : "Show"} diagnostics (
                           {activeError.details.length})
                         </button>
 
                         {showDetails && (
-                          <ul className="mt-1.5 space-y-1 rounded-md bg-black/40 border border-red-500/20 p-2.5 text-[10px] text-red-200/80">
+                          <ul className="mt-2 space-y-1.5 rounded-lg bg-slate-950/75 border border-rose-400/20 p-3 font-mono text-[11px] text-rose-200/85">
                             {activeError.details.map((d, idx) => (
                               <li key={idx} className="flex flex-col">
-                                <span className="text-red-300 font-bold">
+                                <span className="text-rose-300 font-semibold">
                                   [{d.model}]
                                 </span>
                                 <span className="text-slate-300">
@@ -654,20 +625,20 @@ export default function Chat({ ref }: ChatProps) {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-2 pt-0.5">
+                    <div className="flex items-center gap-2 pt-1">
                       <button
                         type="button"
                         onClick={handleRetry}
                         disabled={isBusy}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/20 border border-red-500/40 text-red-100 hover:bg-red-500/35 text-[10px] uppercase tracking-widest transition-all disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-400/40 text-rose-100 hover:bg-rose-500/35 text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer"
                       >
-                        <RefreshCw size={11} />
+                        <RefreshCw size={12} />
                         Retry
                       </button>
                       <button
                         type="button"
                         onClick={dismissError}
-                        className="px-2.5 py-1 rounded-md border border-white/10 text-slate-400 hover:text-white text-[10px] uppercase tracking-widest transition-all"
+                        className="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-all cursor-pointer"
                       >
                         Dismiss
                       </button>
@@ -677,20 +648,20 @@ export default function Chat({ ref }: ChatProps) {
               </AnimatePresence>
 
               {isBusy && (
-                <div className="flex items-center gap-3 px-1 text-yellow-500/70 font-mono text-[10px] tracking-widest uppercase">
+                <div className="flex items-center gap-2.5 px-1 text-sky-400 text-xs font-medium">
                   <div className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-bounce" />
-                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                    <span className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" />
+                    <span className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <span className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce [animation-delay:0.4s]" />
                   </div>
-                  <span>Analyzing_Input_Matrix...</span>
+                  <span>Thinking...</span>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
             {/* INPUT AREA */}
-            <div className="p-3.5 bg-white/2 border-t border-white/10 shrink-0">
+            <div className="p-3.5 bg-slate-900/90 border-t border-slate-800 shrink-0">
               {/* QUICK ACTIONS */}
               {!isBusy && messages.length < 5 && (
                 <div className="flex flex-wrap gap-1.5 mb-2.5">
@@ -698,7 +669,7 @@ export default function Chat({ ref }: ChatProps) {
                     <button
                       key={i}
                       onClick={() => handleSubmit(action.text)}
-                      className="flex items-center gap-1.5 px-2.5 py-1 bg-white/4 border border-white/10 rounded-md text-[10px] font-mono text-slate-300 hover:border-yellow-500/45 hover:text-yellow-400 transition-all"
+                      className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 border border-slate-700/75 rounded-lg text-xs font-medium text-slate-300 hover:border-sky-400/50 hover:text-sky-200 transition-all cursor-pointer"
                     >
                       {action.icon}
                       {action.label}
@@ -707,34 +678,31 @@ export default function Chat({ ref }: ChatProps) {
                 </div>
               )}
 
-              <div className="relative group bg-black/60 border border-white/15 rounded-lg focus-within:border-yellow-500/55 focus-within:bg-yellow-500/3 transition-all duration-300">
-                <span className="absolute left-3.5 top-3 text-yellow-500/60 font-mono text-xs select-none">
-                  {">"}
-                </span>
+              <div className="relative group bg-slate-950/90 border border-slate-700/80 rounded-xl focus-within:border-sky-400/70 transition-all duration-200">
                 <textarea
                   ref={textareaRef}
                   rows={1}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask about projects, stack, or experience..."
-                  className="w-full bg-transparent pl-8 pr-14 py-2.5 text-[13px] font-mono text-slate-200 placeholder:text-slate-600 focus:outline-none resize-none overflow-hidden max-h-28"
+                  placeholder="Ask about projects, automation, or stack..."
+                  className="w-full bg-transparent pl-3.5 pr-14 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none resize-none overflow-hidden max-h-28"
                 />
 
                 <div className="absolute right-2 bottom-1.5 flex gap-1.5">
                   {isBusy ? (
                     <button
                       onClick={stop}
-                      className="px-2.5 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 text-[9px] font-mono hover:bg-red-500 hover:text-white rounded-md transition-all uppercase tracking-widest"
+                      className="px-2.5 py-1.5 bg-rose-500/15 border border-rose-400/35 text-rose-300 text-xs font-semibold hover:bg-rose-500 hover:text-white rounded-lg transition-all cursor-pointer"
                     >
-                      Abort
+                      Stop
                     </button>
                   ) : (
                     <button
                       onClick={() => handleSubmit()}
                       disabled={!input.trim()}
                       aria-label="Send message"
-                      className="p-1.5 text-slate-400 hover:text-yellow-400 transition-colors disabled:opacity-25"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-sky-300 hover:bg-slate-800 transition-colors disabled:opacity-25 cursor-pointer"
                     >
                       <Send size={16} />
                     </button>
@@ -750,17 +718,17 @@ export default function Chat({ ref }: ChatProps) {
       <motion.button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        whileHover={{ scale: 1.04 }}
-        whileTap={{ scale: 0.96 }}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
         aria-label={isOpen ? "Close ARKI_AI chat" : "Open ARKI_AI chat"}
         aria-expanded={isOpen}
-        className="fixed bottom-5 right-6 z-50 flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-[#090d1a]/95 border border-yellow-400/50 text-white shadow-[0_8px_30px_rgba(0,0,0,0.75),0_0_24px_rgba(234,179,8,0.28)] hover:border-yellow-400 hover:shadow-[0_8px_35px_rgba(0,0,0,0.85),0_0_30px_rgba(234,179,8,0.45)] backdrop-blur-xl transition-all cursor-pointer"
+        className="fixed bottom-5 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full bg-slate-900/95 border border-amber-400/55 text-slate-50 shadow-[0_12px_32px_rgba(0,0,0,0.7),0_0_24px_rgba(245,158,11,0.22)] hover:border-amber-300 hover:bg-slate-800 backdrop-blur-xl transition-all cursor-pointer"
       >
         <div className="relative flex items-center justify-center">
           {isOpen ? (
-            <X size={19} className="text-yellow-400" />
+            <X size={18} className="text-amber-400" />
           ) : (
-            <MessageSquareCode size={19} className="text-yellow-400" />
+            <MessageSquareCode size={18} className="text-amber-400" />
           )}
           {!isOpen && (
             <span
@@ -768,11 +736,11 @@ export default function Chat({ ref }: ChatProps) {
             />
           )}
         </div>
-        <span className="font-mono text-xs font-bold uppercase tracking-[0.2em]">
-          {isOpen ? "Close" : "Ask ARKI_AI"}
+        <span className="font-display text-sm font-bold tracking-tight">
+          {isOpen ? "Close Chat" : "Ask ARKI_AI"}
         </span>
         {!isOpen && messages.length > 0 && (
-          <span className="px-1.5 py-0.5 rounded-full bg-yellow-400/20 border border-yellow-400/40 font-mono text-[9px] text-yellow-300 font-bold leading-none">
+          <span className="px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/45 font-mono text-[10px] text-amber-200 font-bold leading-none">
             {messages.length}
           </span>
         )}

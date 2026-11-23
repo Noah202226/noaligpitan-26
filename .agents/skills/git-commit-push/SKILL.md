@@ -14,9 +14,12 @@ Follow these steps in order whenever the user asks to commit and push changes.
 ## Steps
 
 1. **Scan all pending changes (in one command):**
-   - Run `git status --short; git branch --show-current; git diff --stat; git diff --cached --stat` to inspect modified, staged, and untracked files.
+   - Run **only** auto-allowed read-only git commands (do **not** add `echo` separators or unlisted commands, or `.agents/scripts/command-policy.mjs` will fall back to prompting):
+     ```powershell
+     git status --short; git branch --show-current; git diff --stat; git diff --cached --stat
+     ```
    - If there are no changes to commit, check if local commits are ahead of upstream (`git status -sb`). Inform the user if there is nothing to commit or push.
-   - Read the diff (`git diff` and any new untracked files if needed) to understand *what* actually changed.
+   - Read the diff (`git diff` and any new untracked files via `read_file` if needed) to understand *what* actually changed.
 
 2. **Safety Check:**
    - Before suggesting `git add .`, verify no sensitive or unintended files (such as `.env`, `.env.local`, API keys, credentials, or large build artifacts) are untracked or about to be staged.
@@ -34,9 +37,9 @@ Follow these steps in order whenever the user asks to commit and push changes.
 4. **Build Gate & Execute on Approval (Single Prompt):**
    - If the user picks `Cancel`, stop without running build or git commands.
    - Strip any leading `(Recommended) ` prefix from the selected message.
-   - Run `npm.cmd run build` FIRST, and **cancel committing and pushing if the build fails** (PowerShell-safe in one command, auto-allowed by `command-policy.mjs` so no second confirmation popup appears):
+   - Run the single build-gated push script (auto-allowed by `.agents/scripts/command-policy.mjs` so only the `ask_question` picker prompts you — **cancels committing and pushing automatically if `next build` fails**):
      ```powershell
-     npm.cmd run build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git add .; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git commit -m "<approved message>"; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git push
+     node .agents/scripts/build-and-push.mjs "<approved message>"
      ```
-   - If `npm.cmd run build` fails, report clearly that **commit & push were canceled due to build failure** and summarize the build errors so they can be fixed first.
+   - If the build fails, report clearly that **commit & push were canceled due to build failure** and summarize the build errors so they can be fixed first.
    - If everything succeeds, report the build pass, commit hash, branch, and push status back to the user.

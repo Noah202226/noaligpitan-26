@@ -11,19 +11,21 @@ flowchart TD
     Layout["app/layout.tsx (Geist Fonts + Metadata)"] --> Page["app/page.tsx (2-Column HUD Shell)"]
     Data["app/lib/data.js (UNIFIED_DATA)"] --> Page
     Data --> Solutions["SolutionsPanel.tsx"]
+    Data --> Workflow["AiWorkflowPanel.tsx"]
     Data --> Skills["SkillsMatrix.tsx"]
 
     Page --> Scene["Scene.tsx (Fixed 3D Canvas -z-10)"]
     Page --> Left["Left Col: Identity Card + Rotating Status + Stats + Socials"]
-    Page --> Right["Right Col: 6-Tab HUD Panel"]
+    Page --> Right["Right Col: 7-Tab HUD Panel"]
     Page --> Chat["Chat.tsx (Fixed Floating Modal z-50)"]
 
-    Right --> T1["Mission (Hero + Solutions CTA + Core Stack + Counters)"]
+    Right --> T1["Mission (Hero + Solutions/Workflow CTA + Core Stack + Counters)"]
     Right --> T2["Solutions (SolutionsPanel: Filter + Services + Blueprints + Process)"]
-    Right --> T3["Tech & Skills (SkillsMatrix: Capabilities + 5 Stack Modules)"]
-    Right --> T4["Projects (Problem / Solution / Impact Case Studies)"]
-    Right --> T5["Experience (Experience Ledger Timeline)"]
-    Right --> T6["Credentials (2-Col Verified Certificate Cards)"]
+    Right --> T3["AI Workflow (AiWorkflowPanel: Context Engineering + Skills/Guardrails + Copyable Starter Kit)"]
+    Right --> T4["Tech & Skills (SkillsMatrix: Capabilities + 5 Stack Modules)"]
+    Right --> T5["Projects (Problem / Solution / Impact Case Studies)"]
+    Right --> T6["Experience (Experience Ledger Timeline)"]
+    Right --> T7["Credentials (2-Col Verified Certificate Cards)"]
 ```
 
 **Key Touchpoints:**

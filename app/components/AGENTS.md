@@ -2,8 +2,9 @@
 
 Local engineering guardrails for React components in `app/components/`:
 
-1. **Visual Consistency & Styling:**
-   - Preserve the dark cyberpunk/HUD aesthetic (glass cards, crisp borders, blue/yellow highlights, monospace metadata labels).
+1. **Visual Consistency & Design System (ADR-006):**
+   - Use the **Executive Slate & Electric Cyan** palette: `#090D16` canvas, high-opacity frosted panels (`bg-[#0d1424]/90`), elevated slate cards (`bg-slate-800/55 border-slate-700/65`), **Sky Cyan** (`sky-400`/`sky-300`) for primary navigation/accents, **Warm Amber** (`amber-400`/`amber-300`) for primary CTAs, and **Emerald/Rose** strictly for semantic outcomes/alerts.
+   - Typography hierarchy: `font-display` (`Plus Jakarta Sans`, Title Case) for headings, `font-sans` (`Inter`) for body/UI/chat prose, and `font-mono` (`JetBrains Mono`) strictly for code blocks, paths, dates, and tech badges. Avoid ALL-CAPS italic body/navigation labels.
    - Use **Tailwind CSS v4** utilities (`bg-linear-to-r`, `bg-size-[...]`).
    - Use global `.custom-scrollbar` for scrollable panels and `.no-scrollbar` for mobile horizontal swipe strips (`app/globals.css`).
 2. **Responsive Ergonomics:**

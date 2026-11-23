@@ -20,10 +20,12 @@ flowchart LR
 
     Page --> Scene["Scene.tsx (3D Three.js NeuralGrid)"]
     Page --> Solutions["SolutionsPanel.tsx (Services, Blueprints, Process)"]
+    Page --> Workflow["AiWorkflowPanel.tsx (Context Engineering + Starter Kit)"]
     Page --> Skills["SkillsMatrix.tsx (Capabilities + 5 Stack Modules)"]
     Page --> Chat["Chat.tsx (Floating ARKI_AI Modal)"]
 
     Solutions -- "openWithPrompt()" --> Chat
+    Workflow -- "openWithPrompt()" --> Chat
     Chat -- "POST /api/chat" --> Route["app/api/chat/route.ts"]
     KB --> Route
 
@@ -52,7 +54,8 @@ noaligpitan-dev26/
 ├── .agents/
 │   ├── hooks.json                          # PreToolUse command-policy hook config
 │   ├── scripts/
-│   │   └── command-policy.mjs              # Denies .env leaks/force-push, force-asks install/delete, auto-allows tsc/eslint/build & approved git commit-push
+│   │   ├── command-policy.mjs              # Denies .env leaks/force-push, force-asks install/delete, auto-allows tsc/eslint/build & build-and-push
+│   │   └── build-and-push.mjs              # Single-command build-gated git add, commit & push helper (aborts if next build fails)
 │   └── skills/
 │       ├── sync-app-context/SKILL.md       # Workflow: audit repo & update context/ docs
 │       ├── add-portfolio-feature/SKILL.md  # Workflow: build, verify & track new features
@@ -77,6 +80,7 @@ noaligpitan-dev26/
 │   │   ├── streaming-text.ts               # [Unused scratch file — scheduled for cleanup]
 │   │   └── sections/
 │   │       ├── SolutionsPanel.tsx          # Filterable Business/Personal services, blueprints & CTA
+│   │       ├── AiWorkflowPanel.tsx         # Context Engineering showcase, guardrails & copyable starter kit
 │   │       ├── SkillsMatrix.tsx            # Core operational capabilities + 5 tech stack modules
 │   │       ├── Navbar.tsx                  # [Unused prototype — scheduled for cleanup]
 │   │       └── FeatureWork.tsx             # [Unused prototype — scheduled for cleanup]

@@ -1,8 +1,19 @@
 "use client";
-import React, { useRef, useMemo, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial, Environment } from "@react-three/drei";
 import * as THREE from "three";
+
+const PARTICLE_POSITIONS = (() => {
+  const count = 2000;
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 10;
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 10;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 10;
+  }
+  return pos;
+})();
 
 function NeuralGrid() {
   const pointsRef = useRef<THREE.Points>(null!);
@@ -22,17 +33,6 @@ function NeuralGrid() {
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  const positions = useMemo(() => {
-    const count = 2000;
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 10;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 10;
-    }
-    return pos;
   }, []);
 
   useFrame((state) => {
@@ -84,18 +84,19 @@ function NeuralGrid() {
       <mesh ref={boxRef}>
         <boxGeometry args={[3.8, 3.8, 3.8]} />
         <meshBasicMaterial
-          color="#3b82f6"
+          color="#38bdf8"
           wireframe
           transparent
-          opacity={0.08}
+          opacity={0.055}
         />
       </mesh>
 
-      <Points ref={pointsRef} positions={positions} stride={3}>
+      <Points ref={pointsRef} positions={PARTICLE_POSITIONS} stride={3}>
         <PointMaterial
           transparent
-          color="#60a5fa"
-          size={0.04}
+          color="#7dd3fc"
+          opacity={0.65}
+          size={0.032}
           sizeAttenuation={true}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
@@ -103,9 +104,9 @@ function NeuralGrid() {
       </Points>
 
       <mesh>
-        <sphereGeometry args={[0.15, 16, 16]} />
-        <meshBasicMaterial color="#60a5fa" />
-        <pointLight intensity={3} distance={6} color="#3b82f6" />
+        <sphereGeometry args={[0.09, 16, 16]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.4} />
+        <pointLight intensity={1.4} distance={5} color="#38bdf8" />
       </mesh>
     </group>
   );
@@ -113,14 +114,13 @@ function NeuralGrid() {
 
 export default function Scene() {
   return (
-    // Note: Added bg-linear-to-r for v4 tailwind standards as requested
-    <div className="fixed inset-0 -z-10 h-full w-full bg-[#020617] bg-linear-to-r from-[#020617] to-[#0f172a]">
+    <div className="fixed inset-0 -z-10 h-full w-full bg-[#090d16] bg-linear-to-br from-[#090d16] via-[#0b1220] to-[#0f172a]">
       <Canvas
         camera={{ position: [0, 0, 10], fov: 45 }}
         gl={{ antialias: true }}
       >
-        <fog attach="fog" args={["#020617", 8, 22]} />
-        <ambientLight intensity={0.4} />
+        <fog attach="fog" args={["#090d16", 8, 22]} />
+        <ambientLight intensity={0.35} />
 
         <NeuralGrid />
 

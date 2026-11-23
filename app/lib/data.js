@@ -285,6 +285,270 @@ export const UNIFIED_DATA = {
       link: "https://drive.google.com/file/d/1I3GvcZoUOYuju_MYXs9dkV40dCWHoVqv/view?usp=sharing",
     },
   ],
+  ai_workflow: {
+    headline: "Context Engineering, Not Vibe Coding",
+    tagline:
+      "I treat AI coding agents like junior engineers that need architecture maps, decision records, scoped rules, repeatable runbooks, and deterministic build gates.",
+    comparison: [
+      {
+        aspect: "Architecture & Memory",
+        vibeCoding:
+          "Re-explaining the codebase in every chat; AI forgets constraints and drifts across files.",
+        contextEngineering:
+          "Living context/ hub (ARCHITECTURE, FLOWS, DECISIONS, APP_CONTEXT, ROADMAP) keeps every session aligned.",
+      },
+      {
+        aspect: "Regressions & Past Bugs",
+        vibeCoding:
+          "AI accidentally undoes previous bug fixes during later refactors.",
+        contextEngineering:
+          "Architecture Decision Records (ADRs) + folder-scoped AGENTS.md lock critical invariants in place.",
+      },
+      {
+        aspect: "Repeatable Tasks",
+        vibeCoding:
+          "Ad-hoc prompts that skip verification, forget docs, or deploy broken builds.",
+        contextEngineering:
+          "Modular .agents/skills/ runbooks standardize planning, debugging, health audits, and build-gated shipping.",
+      },
+      {
+        aspect: "Safety & Security",
+        vibeCoding:
+          "Risk of exposing .env secrets, force-pushing, or running unchecked commands.",
+        contextEngineering:
+          "PreToolUse command-policy hook hard-blocks .env leaks & force-pushes while gating pushes behind next build.",
+      },
+    ],
+    layers: [
+      {
+        index: "01",
+        title: "Scoped Rules",
+        path: "AGENTS.md + app/*/AGENTS.md",
+        summary:
+          "Slim always-on root rules paired with directory-scoped guardrails (API streaming safety in app/api/, HUD & React 19 patterns in app/components/) so context stays lean and local.",
+      },
+      {
+        index: "02",
+        title: "Living Context Hub",
+        path: "context/*.md",
+        summary:
+          "Version-controlled ARCHITECTURE.md, visual Mermaid FLOWS.md, DECISIONS.md (ADRs), APP_CONTEXT.md feature tracker, and ROADMAP.md backlog.",
+      },
+      {
+        index: "03",
+        title: "On-Demand Skills",
+        path: ".agents/skills/*/SKILL.md",
+        summary:
+          "Progressive-disclosure workflow runbooks loaded only when needed—zero prompt bloat while enforcing consistent steps and interactive approval pickers.",
+      },
+      {
+        index: "04",
+        title: "Deterministic Guardrails",
+        path: ".agents/hooks.json + command-policy.mjs",
+        summary:
+          "PreToolUse policy engine that blocks secret leaks/destructive git commands, requires confirmation for installs/deletions, and enforces npm run build before pushing.",
+      },
+    ],
+    delivery_loop: [
+      { step: "01", label: "Plan", detail: "Align on scope & architecture before editing" },
+      { step: "02", label: "Load Context", detail: "Read FLOWS, ADRs & scoped AGENTS.md" },
+      { step: "03", label: "Implement", detail: "Edit from single source of truth" },
+      { step: "04", label: "Static Check", detail: "Zero errors in tsc & eslint" },
+      { step: "05", label: "Build Gate", detail: "next build must pass before git commit/push" },
+      { step: "06", label: "Sync Context", detail: "Update APP_CONTEXT, FLOWS & ROADMAP" },
+    ],
+    skills_catalog: [
+      {
+        name: "add-portfolio-feature",
+        trigger: "Adding new sections, routes, or capabilities",
+        value:
+          "Loads context/, clarifies ambiguous scope via clickable pickers, implements to spec, runs tsc/eslint, and updates docs.",
+      },
+      {
+        name: "git-commit-push",
+        trigger: "Saying 'git push' or shipping changes",
+        value:
+          "Scans diff & secret hygiene, offers clickable Conventional Commit choices, runs next build gate, and cancels push if build fails.",
+      },
+      {
+        name: "debug-ai-chat",
+        trigger: "Chat errors, 404/429 provider failures, slow streams",
+        value:
+          "Checks env var names safely (never prints secrets), queries live provider /models, smoke-tests streamText, and validates headers.",
+      },
+      {
+        name: "health-check",
+        trigger: "Pre-deploy or periodic maintenance audit",
+        value:
+          "Runs full TypeScript + ESLint sweep, verifies .env.local gitignore, flags unused files/deps, and audits context freshness.",
+      },
+      {
+        name: "explain-flow",
+        trigger: "Asking how a feature or subsystem works",
+        value:
+          "Traces live code end-to-end with Mermaid diagrams + line links and syncs any drift back into context/FLOWS.md.",
+      },
+      {
+        name: "roadmap-picker",
+        trigger: "Asking 'what's next?' or picking a TODO",
+        value:
+          "Reads unchecked P1–P3 items from context/ROADMAP.md and renders a 1-click task menu to start immediately.",
+      },
+      {
+        name: "sync-app-context",
+        trigger: "Auditing or refreshing project docs",
+        value:
+          "Diffs actual repo structure, routes, and package.json against context/APP_CONTEXT.md and ARCHITECTURE.md.",
+      },
+      {
+        name: "update-portfolio-data",
+        trigger: "Updating projects, skills, or experience",
+        value:
+          "Updates UNIFIED_DATA in app/lib/data.js while keeping UI tabs and ARKI_AI's system knowledge base synchronized.",
+      },
+    ],
+    guardrails: [
+      {
+        tier: "DENY",
+        tone: "red",
+        title: "Hard-Blocked Automatically",
+        rules: [
+          "Dumping raw .env / .env.local contents (cat, type, Get-Content)",
+          "Staging .env* files into Git (git add .env.local)",
+          "Destructive history rewrites (git push --force, git reset --hard)",
+        ],
+      },
+      {
+        tier: "FORCE ASK",
+        tone: "amber",
+        title: "Always Confirms With Developer",
+        rules: [
+          "Adding or removing packages (npm install / uninstall, pnpm, yarn)",
+          "Deleting workspace files or folders (Remove-Item, rm -rf, del)",
+        ],
+      },
+      {
+        tier: "AUTO-ALLOW",
+        tone: "emerald",
+        title: "Frictionless Verified Flow",
+        rules: [
+          "Read-only Git checks (status, diff, log, branch, check-ignore)",
+          "TypeScript & ESLint verification (tsc --noEmit, eslint)",
+          "Build-gated production push after 1-click commit approval (next build -> commit -> push)",
+        ],
+      },
+    ],
+    reuse_steps: [
+      "Copy the folder scaffold into any new repository root (AGENTS.md, context/, .agents/).",
+      "Fill in context/ARCHITECTURE.md & context/FLOWS.md once your core routes/data model exist.",
+      "Keep ADRs in context/DECISIONS.md whenever you solve a non-obvious bug so AI never regresses it.",
+    ],
+    templates: [
+      {
+        id: "scaffold",
+        label: "Folder Scaffold",
+        filename: "project-root/",
+        description:
+          "Drop-in directory layout compatible with Antigravity IDE, Claude Code, and modern coding agents.",
+        code: `project-root/
+├── AGENTS.md                        # Slim root rules (auto-loaded)
+├── CLAUDE.md                        # Single line: @AGENTS.md
+├── context/
+│   ├── README.md                    # Index of context files
+│   ├── AI_INSTRUCTIONS.md           # Coding & verification rules
+│   ├── ARCHITECTURE.md              # Stack, file map & env vars
+│   ├── FLOWS.md                     # Mermaid end-to-end flows
+│   ├── DECISIONS.md                 # ADRs (why key fixes exist)
+│   ├── APP_CONTEXT.md               # Feature tracker + changelog
+│   └── ROADMAP.md                   # Prioritized P1-P3 TODOs
+├── .agents/
+│   ├── hooks.json                   # PreToolUse safety hook
+│   ├── scripts/
+│   │   └── command-policy.mjs       # Deny/Force-Ask/Allow policy
+│   └── skills/
+│       ├── add-feature/SKILL.md
+│       ├── health-check/SKILL.md
+│       ├── explain-flow/SKILL.md
+│       └── git-commit-push/SKILL.md # Build-gated push workflow
+└── src/ (or app/)
+    ├── api/AGENTS.md                # Scoped backend guardrails
+    └── components/AGENTS.md         # Scoped frontend guardrails`,
+      },
+      {
+        id: "agents",
+        label: "AGENTS.md",
+        filename: "AGENTS.md",
+        description:
+          "Keep root rules concise (<24 KB) and delegate deep docs to context/ + folder-scoped AGENTS.md files.",
+        code: `# Project Rules
+
+## Central Context Hub (context/)
+- Read context/ARCHITECTURE.md, context/FLOWS.md, and context/APP_CONTEXT.md before feature work.
+- Read context/DECISIONS.md before refactoring core modules so past fixes are never undone.
+- Check context/ROADMAP.md when planning next tasks and mark finished items [x].
+- Update context/APP_CONTEXT.md after adding/changing features, routes, or env vars.
+
+## Scoped Rules
+- Folder-level rules in app/api/AGENTS.md and app/components/AGENTS.md apply automatically.
+
+## Verification Standard
+- Never claim completion until TypeScript (tsc --noEmit) and ESLint pass with 0 errors.
+- Always pass a production build (npm run build) before committing and pushing.`,
+      },
+      {
+        id: "skill",
+        label: "SKILL.md (Git Push Gate)",
+        filename: ".agents/skills/git-commit-push/SKILL.md",
+        description:
+          "Build-gated commit & push workflow with interactive commit message selection.",
+        code: `---
+name: git-commit-push
+description: >-
+  Scans pending Git changes, checks secret hygiene, offers clickable commit
+  message choices, gates pushing behind a production build, then commits & pushes.
+---
+
+# Git Commit & Push Workflow
+
+1. Scan changes:
+   git status --short; git branch --show-current; git diff --stat
+2. Safety check: Ensure no .env* or credential files are untracked/staged.
+3. Ask for approval via ask_question with 2 commit options + Cancel.
+4. On approval, run build gate FIRST and abort if build fails:
+   npm.cmd run build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git add .; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git commit -m "<approved message>"; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git push`,
+      },
+      {
+        id: "hooks",
+        label: "hooks.json + Policy",
+        filename: ".agents/hooks.json",
+        description:
+          "Deterministic PreToolUse hook that enforces secret protection and confirmation gates natively on Windows & Unix.",
+        code: `// .agents/hooks.json
+{
+  "command-policy": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/command-policy.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
+
+// .agents/scripts/command-policy.mjs (core pattern)
+// 1. DENY:      cat/Get-Content .env*, git add .env*, git push --force, git reset --hard
+// 2. FORCE_ASK: npm install/uninstall, Remove-Item / rm -rf
+// 3. ALLOW:     git status/diff/log, tsc --noEmit, eslint, build-gated approved push
+// 4. DEFAULT:   { "decision": "ask" }`,
+      },
+    ],
+  },
 };
 
 // Helper to turn the object into a text block for the AI
@@ -298,6 +562,7 @@ export const getAiKnowledgeBase = () => {
     SERVICES (BUSINESS & PERSONAL): ${UNIFIED_DATA.services.map((s) => `${s.title} (${s.badge}): ${s.tagline} Deliverables: ${s.deliverables.join(", ")}. Outcome: ${s.outcome}`).join(" | ")}
     AUTOMATION BLUEPRINTS: ${UNIFIED_DATA.automation_blueprints.map((b) => `${b.title} (${b.audience}) - Before: ${b.before} After: ${b.after} [${b.stack}]`).join(" | ")}
     DELIVERY PROCESS: ${UNIFIED_DATA.process_steps.map((p) => `${p.step} ${p.title}: ${p.detail}`).join(" -> ")}
+    AI WORKFLOW & CONTEXT ENGINEERING: ${UNIFIED_DATA.ai_workflow.headline} - ${UNIFIED_DATA.ai_workflow.tagline} Layers: ${UNIFIED_DATA.ai_workflow.layers.map((l) => `${l.index} ${l.title} (${l.path}): ${l.summary}`).join(" | ")}. Skills: ${UNIFIED_DATA.ai_workflow.skills_catalog.map((s) => `${s.name} (${s.value})`).join("; ")}. Guardrails: ${UNIFIED_DATA.ai_workflow.guardrails.map((g) => `${g.tier}: ${g.rules.join(", ")}`).join(" | ")}
     EXPERIENCE: ${UNIFIED_DATA.experience.map((e) => `${e.company} as ${e.role} (${e.period}): ${e.details}`).join("; ")}
     PROJECTS: ${UNIFIED_DATA.projects.map((p) => `${p.name} (${p.category}) using ${p.tech} - Problem: ${p.problem} Solution: ${p.solution} Impact: ${p.impact}`).join("; ")}
   `;
