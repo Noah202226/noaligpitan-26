@@ -45,22 +45,33 @@ noaligpitan-dev26/
 │   ├── README.md                           # Index of context/ files
 │   ├── AI_INSTRUCTIONS.md                  # Engineering rules, guardrails & verification steps
 │   ├── ARCHITECTURE.md                     # This file (stack, diagrams, file map, AI pipeline)
+│   ├── FLOWS.md                            # Visual end-to-end flow diagrams & file traces
+│   ├── DECISIONS.md                        # Architecture Decision Records (ADRs)
 │   ├── APP_CONTEXT.md                      # Living feature inventory & dated change log
 │   └── ROADMAP.md                          # Prioritized portfolio TODOs & job-readiness plan
 ├── .agents/
+│   ├── hooks.json                          # PreToolUse command-policy hook config
+│   ├── scripts/
+│   │   └── command-policy.mjs              # Denies .env leaks/force-push, force-asks install/delete, auto-allows tsc/eslint/build & approved git commit-push
 │   └── skills/
 │       ├── sync-app-context/SKILL.md       # Workflow: audit repo & update context/ docs
 │       ├── add-portfolio-feature/SKILL.md  # Workflow: build, verify & track new features
 │       ├── update-portfolio-data/SKILL.md  # Workflow: update UNIFIED_DATA & AI knowledge base
-│       └── git-commit-push/SKILL.md        # Workflow: scan diff, suggest commit msg, approve & push
+│       ├── roadmap-picker/SKILL.md         # Workflow: interactive clickable picker for ROADMAP.md tasks
+│       ├── debug-ai-chat/SKILL.md          # Workflow: diagnose AI providers, models & streams
+│       ├── health-check/SKILL.md           # Workflow: pre-deploy tsc, eslint & repo audit
+│       ├── explain-flow/SKILL.md           # Workflow: trace & explain any app flow visually
+│       └── git-commit-push/SKILL.md        # Workflow: scan diff, clickable commit msg picker, approve & push
 ├── app/
 │   ├── layout.tsx                          # Root layout, Geist fonts, SEO metadata
 │   ├── globals.css                         # Tailwind v4 entry + .custom-scrollbar & .no-scrollbar
 │   ├── page.tsx                            # Widescreen 2-column HUD layout + 6-tab panel
 │   ├── api/
+│   │   ├── AGENTS.md                       # Scoped API & AI streaming rules
 │   │   └── chat/
 │   │       └── route.ts                    # Streaming AI route + preflight fallback + rate limit
 │   ├── components/
+│   │   ├── AGENTS.md                       # Scoped UI, Tailwind v4 & React 19 rules
 │   │   ├── Scene.tsx                       # Full-screen 3D Three.js NeuralGrid background
 │   │   ├── Chat.tsx                        # Floating ARKI_AI popup modal + markdown + error alerts
 │   │   ├── streaming-text.ts               # [Unused scratch file — scheduled for cleanup]

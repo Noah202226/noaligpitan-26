@@ -15,7 +15,7 @@
 | **Skills Matrix HUD** | Active | `app/components/sections/SkillsMatrix.tsx` | Renders 4 Core Operational Capabilities plus all 5 tech stack categories (`Frontend`, `Backend`, `Database`, `Automation & AI`, `Tools & Platforms`) in a responsive 2-column grid inside the `Tech & Skills` tab. |
 | **`ARKI_AI` Floating Popup Chat Modal** | Active | `app/components/Chat.tsx` | Modern floating bottom-right launcher (`Ask ARKI_AI`) opening an animated popup modal with imperative `openWithPrompt()` deep-link handle, desktop expand/collapse, mobile full-view + backdrop, Escape-to-close, persistent conversation state, inline markdown formatting, quick actions, model badge, fallback notice, and `SYSTEM_ALERT` error diagnostics & retry. |
 | **Multi-Provider Free-Tier AI Backend** | Active | `app/api/chat/route.ts` | Preflight stream verification (`startVerifiedStream`), ASCII-safe response headers, per-model cooldowns, per-IP rate limit (25 req/hr), and 5-provider free-tier fallback chain. |
-| **AI Context Hub & Skills** | Active | `context/`, `AGENTS.md`, `.agents/skills/` | Consolidated AI instructions, architecture docs, feature tracker, roadmap, and 4 workspace skills. |
+| **AI Context Hub, Rules, Skills & Hooks** | Active | `context/`, `AGENTS.md`, `app/*/AGENTS.md`, `.agents/` | Consolidated AI instructions, architecture docs, visual `FLOWS.md`, `DECISIONS.md` (ADRs), feature tracker, roadmap, scoped API/UI rules, 8 workspace skills (with interactive `ask_question` pickers), and a `PreToolUse` `command-policy.mjs` hook. |
 | **Database / Persistence** | Not Added | — | No DB installed yet; portfolio content is static and chat history resets on reload. |
 | **Job-Readiness Enhancements** | Planned | `context/ROADMAP.md` | GitHub/repo links, PDF resume + email CTA, ArcTech freelance experience entry, quantified metrics, project previews, OpenGraph metadata, and unused prototype cleanup. |
 
@@ -24,6 +24,8 @@
 ## 2. Change Log
 
 - **2026-11-23:**
+  - Added interactive IDE prompts & command policies: upgraded `git-commit-push` (single-prompt `ask_question` picker + `npm.cmd run build` gate canceling push on build failure) and `add-portfolio-feature` to use clickable pickers, created `roadmap-picker` skill, and added `command-policy.mjs` (`deny` .env leaks/force-push, `force_ask` install/delete, `allow` safe git/build/tsc/eslint).
+  - Upgraded agentic coding setup: added `context/FLOWS.md` (visual Mermaid flows), `context/DECISIONS.md` (ADRs), scoped directory rules (`app/api/AGENTS.md`, `app/components/AGENTS.md`), 3 new skills (`debug-ai-chat`, `health-check`, `explain-flow`), and `.agents/hooks.json` + `.agents/scripts/guard-secrets.mjs` (`PreToolUse` `.env` secret-leak guard).
   - Created centralized `context/` folder (`README.md`, `AI_INSTRUCTIONS.md`, `ARCHITECTURE.md`, `APP_CONTEXT.md`, `ROADMAP.md`), migrated context/roadmap docs out of `docs/`, and updated `AGENTS.md` and `.agents/skills/` references.
   - Added prioritized job-readiness and portfolio improvement backlog in `context/ROADMAP.md`.
 - **2026-11-22:**

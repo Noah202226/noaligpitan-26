@@ -7,13 +7,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # Project Rules — `noaligpitan-dev26`
 
 ## Central Context Hub (`context/`)
-- All detailed AI instructions, architecture docs, feature tracking, and planned TODOs live in `context/`:
+- All detailed AI instructions, architecture docs, flow maps, decision records, feature tracking, and planned TODOs live in `context/`:
   - `context/AI_INSTRUCTIONS.md` — full engineering rules, styling conventions, and verification commands.
   - `context/ARCHITECTURE.md` — tech stack, data flow diagrams, file map, AI chat pipeline, and env vars.
+  - `context/FLOWS.md` — visual end-to-end flow diagrams & file traces across UI, 3D scene, and `ARKI_AI`.
+  - `context/DECISIONS.md` — Architecture Decision Records (ADRs) explaining non-obvious invariants.
   - `context/APP_CONTEXT.md` — living feature inventory and change log.
   - `context/ROADMAP.md` — prioritized job-readiness and portfolio improvement TODOs.
-- Read `context/ARCHITECTURE.md` and `context/APP_CONTEXT.md` at the start of feature or architecture work, and check `context/ROADMAP.md` when planning upcoming improvements.
-- Whenever you add, remove, or significantly change a feature, route, component, provider, or env var, update `context/APP_CONTEXT.md` (and `context/ARCHITECTURE.md` / `context/ROADMAP.md` as applicable).
+- Scoped local rules also live in `app/api/AGENTS.md` and `app/components/AGENTS.md` and apply automatically when editing those folders.
+- Read `context/ARCHITECTURE.md`, `context/FLOWS.md`, and `context/APP_CONTEXT.md` at the start of feature or architecture work, and check `context/ROADMAP.md` when planning upcoming improvements.
+- Whenever you add, remove, or significantly change a feature, route, component, provider, or env var, update `context/APP_CONTEXT.md` (and `context/ARCHITECTURE.md` / `context/FLOWS.md` / `context/ROADMAP.md` as applicable).
 
 ## Critical Invariants
 - **Single Source of Truth:** Keep portfolio profile, stack, services, blueprints, experience, projects, and credentials in `app/lib/data.js` (`UNIFIED_DATA`) synced with `getAiKnowledgeBase()`.

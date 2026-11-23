@@ -22,15 +22,21 @@ Follow these steps in order whenever the user asks to commit and push changes.
    - Before suggesting `git add .`, verify no sensitive or unintended files (such as `.env`, `.env.local`, API keys, credentials, or large build artifacts) are untracked or about to be staged.
    - If any sensitive file appears in `git status`, warn the user immediately and do **not** run `git add .` until resolved.
 
-3. **Suggest Commit Message & Wait for Approval:**
-   - Present a brief summary of the changed/new files.
-   - Suggest a clear, concise Conventional Commit message based on the actual diff (e.g., `feat(ui): ...`, `fix(chat): ...`, `docs: ...`).
-   - Ask the user to approve the suggested commit message (or provide a custom one).
-   - **STOP and wait for the user's reply.** Do NOT stage, commit, or push before the user approves.
+3. **Suggest Commit Message via Interactive Picker & Wait for Approval:**
+   - First output a concise summary of the changed/new files (plus the safety check status).
+   - Call the `ask_question` tool to present a clickable numbered prompt with 3 options:
+     1. `(Recommended) <drafted Conventional Commit message based on the diff>`
+     2. `<shorter or alternative commit message>`
+     3. `Cancel — do not commit or push yet`
+     *(The UI automatically includes an "Other" option so the user can enter a custom commit message.)*
+   - **STOP and wait for the user's selection.** Do NOT stage, commit, or push before the user approves.
 
-4. **Execute on Approval:**
-   - Once the user approves (or supplies their preferred message), run the sequence in one command (PowerShell-safe):
+4. **Build Gate & Execute on Approval (Single Prompt):**
+   - If the user picks `Cancel`, stop without running build or git commands.
+   - Strip any leading `(Recommended) ` prefix from the selected message.
+   - Run `npm.cmd run build` FIRST, and **cancel committing and pushing if the build fails** (PowerShell-safe in one command, auto-allowed by `command-policy.mjs` so no second confirmation popup appears):
      ```powershell
-     git add .; if ($LASTEXITCODE -eq 0) { git commit -m "<approved message>" }; if ($LASTEXITCODE -eq 0) { git push }
+     npm.cmd run build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git add .; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git commit -m "<approved message>"; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git push
      ```
-   - Report the resulting commit hash, branch, and push status back to the user.
+   - If `npm.cmd run build` fails, report clearly that **commit & push were canceled due to build failure** and summarize the build errors so they can be fixed first.
+   - If everything succeeds, report the build pass, commit hash, branch, and push status back to the user.

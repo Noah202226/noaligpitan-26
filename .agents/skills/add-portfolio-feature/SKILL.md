@@ -20,6 +20,7 @@ Follow this structured sequence when implementing a new feature in `noaligpitan-
 
 2. **Plan & Confirm Scope (if ambiguous):**
    - Identify which files will be created or modified (`app/page.tsx`, `app/components/`, `app/api/`, `app/lib/data.js`).
+   - If placement, UX style, or service provider choices are ambiguous, use the `ask_question` tool to present 2–4 clickable options (recommended option first) before editing.
    - If the feature introduces a database or external service, confirm the provider and env variable names before installing packages.
 
 3. **Implement Following Project Standards:**
