@@ -20,7 +20,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Critical Invariants
 - **Single Source of Truth:** Keep portfolio profile, stack, services, blueprints, experience, projects, and credentials in `app/lib/data.js` (`UNIFIED_DATA`) synced with `getAiKnowledgeBase()`.
-- **Styling:** Preserve the dark cyberpunk/HUD aesthetic using Tailwind CSS v4 utilities (`bg-linear-to-r`, `bg-size-[...]`).
+- **Styling & UI Copy:** Preserve the dark Executive Slate & Electric Cyan aesthetic using Tailwind CSS v4 utilities (`bg-linear-to-r`, `bg-size-[...]`). Never add AI-slop filler badges (e.g., `"Verified"`) or layout-meta labels (e.g., `"Wide View"`, `"Overview"`) to the UI.
 - **AI Chat Route (`app/api/chat/route.ts`):** Always preflight streams via `startVerifiedStream()`, sanitize custom HTTP headers with `toSafeHeaderValue()`, and use `.chat(modelId)` for OpenAI-compatible third-party providers.
 - **Verification:** Run `node node_modules/typescript/bin/tsc --noEmit` and `node node_modules/eslint/bin/eslint.js <changed-files>` after code changes.
 - **Git Push Workflow:** When the user asks to commit or push, read `.agents/skills/git-commit-push/SKILL.md` *before* running any shell command, and run only the exact auto-allowed scan/push commands in `.agents/scripts/command-policy.mjs` (no `echo` wrappers or unlisted commands).

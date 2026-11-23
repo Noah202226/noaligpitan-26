@@ -81,6 +81,7 @@ noaligpitan-dev26/
 │   │   └── sections/
 │   │       ├── SolutionsPanel.tsx          # Filterable Business/Personal services, blueprints & CTA
 │   │       ├── AiWorkflowPanel.tsx         # Context Engineering showcase, guardrails & copyable starter kit
+│   │       ├── CredentialsPanel.tsx        # Filterable Credentials cards with subject & issuer brand icons
 │   │       ├── SkillsMatrix.tsx            # Core operational capabilities + 5 tech stack modules
 │   │       ├── Navbar.tsx                  # [Unused prototype — scheduled for cleanup]
 │   │       └── FeatureWork.tsx             # [Unused prototype — scheduled for cleanup]

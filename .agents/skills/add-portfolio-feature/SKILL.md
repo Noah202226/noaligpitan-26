@@ -24,7 +24,8 @@ Follow this structured sequence when implementing a new feature in `noaligpitan-
    - If the feature introduces a database or external service, confirm the provider and env variable names before installing packages.
 
 3. **Implement Following Project Standards:**
-   - Match the dark cyberpunk/HUD visual design (Tailwind v4 utilities, Framer Motion transitions, monospace HUD labels).
+   - Match the **Executive Slate & Electric Cyan** design system (ADR-006: `Plus Jakarta Sans` + `Inter` + `JetBrains Mono`, Tailwind v4 utilities, Framer Motion transitions).
+   - **Keep UI copy clean and authentic:** Never add AI-slop filler badges (e.g., `"Verified"`, `"Official"`) or internal layout/mode indicator pills (e.g., `"Wide View"`, `"Overview"`, `"Focus Mode"`) to the UI.
    - If adding portfolio content, update `UNIFIED_DATA` in `app/lib/data.js` so `ARKI_AI` automatically knows about it via `getAiKnowledgeBase()`.
    - If modifying `app/api/chat/route.ts`, preserve `startVerifiedStream()`, `toSafeHeaderValue()`, and structured `{ code, error, details }` error responses.
 

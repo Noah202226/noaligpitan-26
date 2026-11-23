@@ -26,6 +26,7 @@
 - Use **Tailwind CSS v4** utilities (`bg-linear-to-r`, `bg-size-[...]`).
 - Use global `.custom-scrollbar` for scrollable panels and `.no-scrollbar` for mobile horizontal swipe bars (`app/globals.css`).
 - Keep desktop views widescreen-friendly (`max-w-[1640px]`, readable typography) and mobile button/tab groups as single-row horizontal swipe strips.
+- **No AI slop or layout-meta labels:** Avoid filler buzzword badges (like `"Verified"`, `"Official"`) and never display internal layout/viewport state pills (like `"Wide View"`, `"Overview"`, `"Focus Mode"`) in the UI. Every visible badge or label must carry real user value.
 
 ### AI Chat Backend (`app/api/chat/route.ts`) & Frontend (`app/components/Chat.tsx`)
 - **Preflight streaming:** Never return `streamText().toUIMessageStreamResponse()` directly inside a provider fallback loop — `streamText()` is lazy and commits HTTP 200 before provider errors fire. Always verify the stream through `startVerifiedStream()`.

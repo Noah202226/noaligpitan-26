@@ -186,7 +186,7 @@ export default function AiWorkflowPanel({ onAskAi }: AiWorkflowPanelProps) {
             <div className="flex items-center gap-2">
               <GitBranch size={17} className="text-emerald-400" />
               <h3 className="font-display text-base font-bold text-slate-100">
-                Verified Agentic Delivery Loop
+                Build-Gated Delivery Loop
               </h3>
             </div>
 

@@ -261,27 +261,76 @@ export const UNIFIED_DATA = {
   ],
   credentials: [
     {
+      title: "Coding With AI - Planning To Production",
+      issuer: "Udemy (Brad Traversy)",
+      id: "Jun 2026",
+      category: "AI & Automation",
+      filterGroup: "ai-data",
+      iconKey: "ai",
+      issuerKey: "udemy",
+      summary:
+        "16.5-hour end-to-end workflow covering AI-assisted system planning, architecture, and production deployment.",
+      featured: true,
+      link: "https://drive.google.com/file/d/16DbE5dP3bcGtLumknBJI8aCO4WYeq_ap/view?usp=sharing",
+    },
+    {
+      title: "Intro to Data Science Certificate",
+      issuer: "Cisco Networking Academy",
+      id: "26 Feb 2026",
+      category: "Data Science",
+      filterGroup: "ai-data",
+      iconKey: "data",
+      issuerKey: "cisco",
+      summary:
+        "Foundations in data collection, exploratory analysis, AI/ML concepts, and data-driven business decisions.",
+      link: "https://drive.google.com/open?id=1EjWsvR74U1FiWJbgNIJockHvj3lySU-V&usp=drive_copy",
+    },
+    {
       title: "Python Essentials Certificate",
       issuer: "Cisco Networking Academy",
       id: "Aug 2025",
+      category: "Programming",
+      filterGroup: "programming",
+      iconKey: "python",
+      issuerKey: "cisco",
+      summary:
+        "Core Python syntax, data structures, scripting, and automation fundamentals for backend & AI tooling.",
       link: "https://drive.google.com/open?id=1T6wCE6yQhto4xRTtjhObYU_msnGd26B0&usp=drive_copy",
     },
     {
       title: "JavaScript Essentials Certificate",
       issuer: "Cisco Networking Academy",
       id: "Aug 2025",
+      category: "Programming",
+      filterGroup: "programming",
+      iconKey: "javascript",
+      issuerKey: "cisco",
+      summary:
+        "Modern JavaScript programming, asynchronous workflows, and interactive web application engineering.",
       link: "https://drive.google.com/open?id=1QYzyDRc0Rp1U2mOrrafCXJ23XvywiZof&usp=drive_copy",
     },
     {
-      title: "Intro to Data Science Certificate",
-      issuer: "Cisco Networking Academy",
-      id: "26 Feb 2026",
-      link: "https://drive.google.com/open?id=1EjWsvR74U1FiWJbgNIJockHvj3lySU-V&usp=drive_copy",
+      title: "Basic WordPress & VirtualWorkPH Certificates",
+      issuer: "VirtualWorkPH",
+      id: "Mar 2025",
+      category: "CMS & Web Ops",
+      filterGroup: "cms-academic",
+      iconKey: "wordpress",
+      issuerKey: "virtualworkph",
+      summary:
+        "Multi-certificate training bundle covering WordPress site development and remote digital operations.",
+      link: "https://drive.google.com/file/d/1InxMtsVeJD20kj-bPFZuI14q6XD6FKVC/view?usp=sharing",
     },
     {
       title: "Information and Communication Technology",
       issuer: "Amg Skilled Hands Technological College",
       id: "April 2016",
+      category: "Academic",
+      filterGroup: "cms-academic",
+      iconKey: "academic",
+      issuerKey: "college",
+      summary:
+        "Formal college credential in computer systems, networking fundamentals, and IT infrastructure support.",
       link: "https://drive.google.com/file/d/1I3GvcZoUOYuju_MYXs9dkV40dCWHoVqv/view?usp=sharing",
     },
   ],
@@ -565,5 +614,6 @@ export const getAiKnowledgeBase = () => {
     AI WORKFLOW & CONTEXT ENGINEERING: ${UNIFIED_DATA.ai_workflow.headline} - ${UNIFIED_DATA.ai_workflow.tagline} Layers: ${UNIFIED_DATA.ai_workflow.layers.map((l) => `${l.index} ${l.title} (${l.path}): ${l.summary}`).join(" | ")}. Skills: ${UNIFIED_DATA.ai_workflow.skills_catalog.map((s) => `${s.name} (${s.value})`).join("; ")}. Guardrails: ${UNIFIED_DATA.ai_workflow.guardrails.map((g) => `${g.tier}: ${g.rules.join(", ")}`).join(" | ")}
     EXPERIENCE: ${UNIFIED_DATA.experience.map((e) => `${e.company} as ${e.role} (${e.period}): ${e.details}`).join("; ")}
     PROJECTS: ${UNIFIED_DATA.projects.map((p) => `${p.name} (${p.category}) using ${p.tech} - Problem: ${p.problem} Solution: ${p.solution} Impact: ${p.impact}`).join("; ")}
+    CREDENTIALS: ${UNIFIED_DATA.credentials.map((c) => `${c.title} by ${c.issuer} (${c.id})`).join("; ")}
   `;
 };

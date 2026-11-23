@@ -21,6 +21,7 @@ import Chat, { ChatHandle } from "./components/Chat";
 import SkillsMatrix from "./components/sections/SkillsMatrix";
 import SolutionsPanel from "./components/sections/SolutionsPanel";
 import AiWorkflowPanel from "./components/sections/AiWorkflowPanel";
+import CredentialsPanel from "./components/sections/CredentialsPanel";
 
 import { UNIFIED_DATA } from "@/app/lib/data";
 
@@ -393,7 +394,7 @@ export default function Home() {
           {/* RIGHT: EXPANDING HIGH-CONTRAST DYNAMIC CONTENT PANEL */}
           <div className="flex-1 min-w-0 flex flex-col bg-[#0d1424]/90 backdrop-blur-xl border border-slate-700/65 rounded-xl overflow-hidden min-h-0 shadow-2xl shadow-black/50 transition-all duration-500">
             {/* TOP ANIMATED ICON-ASSISTED NAVIGATION TABS */}
-            <div className="px-4 sm:px-6 py-3 border-b border-slate-800/90 bg-slate-950/65 shrink-0 flex items-center justify-between gap-3">
+            <div className="px-4 sm:px-6 py-3 border-b border-slate-800/90 bg-slate-950/65 shrink-0 flex items-center">
               <div className="flex flex-nowrap lg:flex-wrap items-center gap-1.5 overflow-x-auto no-scrollbar">
                 {SECTIONS.map((s) => {
                   const isActive = activeSection === s.id;
@@ -444,16 +445,6 @@ export default function Home() {
                   );
                 })}
               </div>
-
-              {/* Subtle Focus Mode Indicator on Desktop */}
-              <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900/80 border border-slate-800 font-mono text-[10px] text-slate-400 shrink-0">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    isCompactSidebar ? "bg-sky-400" : "bg-emerald-400"
-                  }`}
-                />
-                {isCompactSidebar ? "Wide View" : "Overview"}
-              </span>
             </div>
 
             {/* SCROLLABLE DETAIL CONTENT WITH DIRECTIONAL SPRING SLIDE */}
@@ -749,46 +740,7 @@ export default function Home() {
                     </div>
                   )}
 
-                  {activeSection === "credentials" && (
-                    <div className="space-y-5">
-                      <div>
-                        <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">
-                          Credentials &amp; Certifications
-                        </h2>
-                        <p className="text-sm text-slate-400 mt-1">
-                          Verified training and academic credentials — click any
-                          card to view the certificate.
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {UNIFIED_DATA.credentials.map((cred, i) => (
-                          <motion.a
-                            key={i}
-                            href={cred.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            whileHover={{ y: -2 }}
-                            className="p-5 rounded-xl bg-slate-800/55 border border-slate-700/65 hover:border-sky-400/50 hover:bg-slate-800/80 flex flex-col justify-between space-y-3 group transition-all"
-                          >
-                            <div className="flex justify-between items-start gap-3">
-                              <span className="font-display text-base font-bold text-slate-50 group-hover:text-sky-300 transition-colors leading-snug">
-                                {cred.title}
-                              </span>
-                              <span className="font-mono text-[10px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-400/30 px-2 py-0.5 rounded-md shrink-0">
-                                Verified
-                              </span>
-                            </div>
-                            <div className="flex flex-wrap justify-between items-center gap-2 text-xs text-slate-300 pt-1 border-t border-slate-700/50">
-                              <span className="font-medium">{cred.issuer}</span>
-                              <span className="font-mono text-slate-400 group-hover:text-sky-300 transition-colors">
-                                {cred.id}
-                              </span>
-                            </div>
-                          </motion.a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {activeSection === "credentials" && <CredentialsPanel />}
                 </motion.div>
               </AnimatePresence>
             </div>
