@@ -22,4 +22,4 @@ description: >-
 
 3. **Verify & Track:**
    - Run `node node_modules/typescript/bin/tsc --noEmit` and `node node_modules/eslint/bin/eslint.js app/lib/data.js`.
-   - Update `docs/APP_CONTEXT.md` Change Log (and clear any resolved items under Pending cleanup).
+   - Update `context/APP_CONTEXT.md` Change Log (and check off any resolved items in `context/ROADMAP.md`).

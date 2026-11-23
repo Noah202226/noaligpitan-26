@@ -14,7 +14,8 @@ Follow this structured sequence when implementing a new feature in `noaligpitan-
 ## Steps
 
 1. **Load Context:**
-   - Read `docs/APP_CONTEXT.md` to review existing features, conventions, and file layout.
+   - Read `context/ARCHITECTURE.md`, `context/APP_CONTEXT.md`, and `context/AI_INSTRUCTIONS.md` to review existing features, conventions, and file layout.
+   - Check `context/ROADMAP.md` if the feature corresponds to a planned item.
    - If the feature touches Next.js App Router APIs, consult the relevant guide in `node_modules/next/dist/docs/`.
 
 2. **Plan & Confirm Scope (if ambiguous):**
@@ -32,4 +33,4 @@ Follow this structured sequence when implementing a new feature in `noaligpitan-
    - Fix all reported errors before finishing.
 
 5. **Update Living Context:**
-   - Update `docs/APP_CONTEXT.md` (Project Structure, Feature Inventory, Env Vars if applicable, and Change Log).
+   - Update `context/APP_CONTEXT.md` (Feature Inventory and Change Log), `context/ARCHITECTURE.md` (if structure/env vars changed), and check off completed items in `context/ROADMAP.md`.
